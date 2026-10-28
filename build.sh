@@ -1,5 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-curl -sL https://github.com/Losses/boring/releases/latest/download/registry-tool -o /tmp/registry-tool
-chmod +x /tmp/registry-tool
-/tmp/registry-tool --tree "$PWD" --output "$PWD/dist" --base-url https://registry.tiqian.org --swift-scope tiqian --archive-base https://registry-storage.tiqian.org
+TOOL_DIR="$PWD/.tool-bin"
+mkdir -p "$TOOL_DIR"
+curl -fSL https://github.com/Losses/boring/releases/latest/download/registry-tool -o "$TOOL_DIR/registry-tool"
+chmod +x "$TOOL_DIR/registry-tool"
+"$TOOL_DIR/registry-tool" --tree "$PWD" --output "$PWD/dist" --base-url https://registry.tiqian.org --swift-scope tiqian --archive-base https://registry-storage.tiqian.org
