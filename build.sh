@@ -12,6 +12,5 @@ for d in */; do
   case "$d" in .git/|.tool-bin/|.tree/|dist/) continue ;; esac
   cp -r "$d" "$TREE_DIR/"
 done
-[ -f README.md ] && cp README.md "$TREE_DIR/"
 
 "$TOOL_DIR/registry-tool" --tree "$TREE_DIR" --output "$PWD/dist" --base-url https://registry.tiqian.org --swift-scope tiqian --archive-base https://registry-storage.tiqian.org
