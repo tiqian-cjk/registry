@@ -2,7 +2,7 @@
 set -euo pipefail
 TOOL_DIR="$PWD/.tool-bin"
 mkdir -p "$TOOL_DIR"
-curl -fSL https://github.com/Losses/boring/releases/download/v0.0.0-snapshot.4/registry-tool -o "$TOOL_DIR/registry-tool"
+curl -fSL https://github.com/Losses/boring/releases/download/v0.0.0-snapshot.5/registry-tool -o "$TOOL_DIR/registry-tool"
 chmod +x "$TOOL_DIR/registry-tool"
 
 TREE_DIR="$PWD/.tree"
