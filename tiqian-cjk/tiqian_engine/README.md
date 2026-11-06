@@ -1,3 +1,3 @@
-# tiqian_engine
+# tiqian-engine
 
-Pub package for the tiqian layout engine.
+Package metadata for tiqian-engine.
