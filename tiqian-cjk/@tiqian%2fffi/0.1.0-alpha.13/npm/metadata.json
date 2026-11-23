@@ -1,0 +1,14 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "engines": {
+      "node": ">=22"
+    }
+  },
+  "name": "@tiqian/ffi",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "auQ+RSPXJwb3HYKzlqGp1jLADAW0vk+v7UcZR4SS6W3GI2WuH8Rp1KFlApWlTg2JdG0vkTPENFW1Bm2wALxbKA==",
+  "tag": "v0.1.0-alpha.13",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-ffi-0.1.0-alpha.13.tgz",
+  "version": "0.1.0-alpha.13"
+}

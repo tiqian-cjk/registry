@@ -1,0 +1,35 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "tiqian-android-shaping",
+      "file": "tiqian-android-shaping-0.1.0-alpha.13-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-android-shaping-0.1.0-alpha.13-javadoc.jar"
+    },
+    {
+      "artifactId": "tiqian-android-shaping",
+      "file": "tiqian-android-shaping-0.1.0-alpha.13-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-android-shaping-0.1.0-alpha.13-sources.jar"
+    },
+    {
+      "artifactId": "tiqian-android-shaping",
+      "file": "tiqian-android-shaping-0.1.0-alpha.13.aar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-android-shaping-0.1.0-alpha.13.aar"
+    },
+    {
+      "artifactId": "tiqian-android-shaping",
+      "file": "tiqian-android-shaping-0.1.0-alpha.13.module",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-android-shaping-0.1.0-alpha.13.module"
+    },
+    {
+      "artifactId": "tiqian-android-shaping",
+      "file": "tiqian-android-shaping-0.1.0-alpha.13.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-android-shaping-0.1.0-alpha.13.pom"
+    }
+  ],
+  "groupId": "org.tiqian",
+  "license": "MPL-2.0",
+  "name": "tiqian-android-shaping",
+  "repository": "tiqian-cjk/tiqian",
+  "tag": "v0.1.0-alpha.13",
+  "version": "0.1.0-alpha.13"
+}

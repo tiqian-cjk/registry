@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "tiqian-jvm-skia",
+      "file": "tiqian-jvm-skia-0.1.0-alpha.13-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-0.1.0-alpha.13-javadoc.jar"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia",
+      "file": "tiqian-jvm-skia-0.1.0-alpha.13-kotlin-tooling-metadata.json",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-0.1.0-alpha.13-kotlin-tooling-metadata.json"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia",
+      "file": "tiqian-jvm-skia-0.1.0-alpha.13-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-0.1.0-alpha.13-sources.jar"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia",
+      "file": "tiqian-jvm-skia-0.1.0-alpha.13.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-0.1.0-alpha.13.jar"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia",
+      "file": "tiqian-jvm-skia-0.1.0-alpha.13.module",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-0.1.0-alpha.13.module"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia",
+      "file": "tiqian-jvm-skia-0.1.0-alpha.13.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-0.1.0-alpha.13.pom"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia-jvm",
+      "file": "tiqian-jvm-skia-jvm-0.1.0-alpha.13-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-jvm-0.1.0-alpha.13-javadoc.jar"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia-jvm",
+      "file": "tiqian-jvm-skia-jvm-0.1.0-alpha.13-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-jvm-0.1.0-alpha.13-sources.jar"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia-jvm",
+      "file": "tiqian-jvm-skia-jvm-0.1.0-alpha.13.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-jvm-0.1.0-alpha.13.jar"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia-jvm",
+      "file": "tiqian-jvm-skia-jvm-0.1.0-alpha.13.module",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-jvm-0.1.0-alpha.13.module"
+    },
+    {
+      "artifactId": "tiqian-jvm-skia-jvm",
+      "file": "tiqian-jvm-skia-jvm-0.1.0-alpha.13.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-jvm-skia-jvm-0.1.0-alpha.13.pom"
+    }
+  ],
+  "groupId": "org.tiqian",
+  "license": "MPL-2.0",
+  "name": "tiqian-jvm-skia",
+  "repository": "tiqian-cjk/tiqian",
+  "tag": "v0.1.0-alpha.13",
+  "version": "0.1.0-alpha.13"
+}

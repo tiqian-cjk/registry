@@ -1,0 +1,19 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "dependencies": {
+      "@tiqian/ffi": "0.1.0-alpha.13",
+      "@tiqian/protocol": "0.1.0-alpha.13",
+      "@tiqian/shared": "0.1.0-alpha.13"
+    },
+    "engines": {
+      "node": ">=22"
+    }
+  },
+  "name": "@tiqian/core",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "Ctet7An1ORWbZlzg5dQeLFsnQTDLQzfRwgkUGyWZZUWYHElQ4ckVqNzxTOmjboywKocHtTww9j4CWezjyOG5mg==",
+  "tag": "v0.1.0-alpha.13",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.13/tiqian-core-0.1.0-alpha.13.tgz",
+  "version": "0.1.0-alpha.13"
+}
