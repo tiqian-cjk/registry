@@ -1,0 +1,17 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "cpu": [
+      "arm64"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "name": "@tiqian/precompute-linux-arm64-gnu",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "Xq4xb8t/SdHTA4PrtdXzD9Xak95YhoyxyoVkX1Aw+weos0loeFwG2eCc563++GNNRcyA/NHgTv//rvBxMaq4hA==",
+  "tag": "v0.1.0-alpha.11",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.11/tiqian-precompute-linux-arm64-gnu-0.1.0-alpha.11.tgz",
+  "version": "0.1.0-alpha.11"
+}

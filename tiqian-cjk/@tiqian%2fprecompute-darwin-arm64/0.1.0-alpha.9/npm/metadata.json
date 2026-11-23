@@ -1,0 +1,17 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "cpu": [
+      "arm64"
+    ],
+    "os": [
+      "darwin"
+    ]
+  },
+  "name": "@tiqian/precompute-darwin-arm64",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "0UDB3lC+U32r1NqIsvqxnyNHnfbR3TFqvytyVQa2Wv6tP7PIKCj25F/i6Yis2bMUNSoOjnO4GGpMq0bKNvU1Dw==",
+  "tag": "v0.1.0-alpha.9",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.9/tiqian-precompute-darwin-arm64-0.1.0-alpha.9.tgz",
+  "version": "0.1.0-alpha.9"
+}

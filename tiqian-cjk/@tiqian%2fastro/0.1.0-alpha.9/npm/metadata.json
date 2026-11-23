@@ -1,0 +1,22 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "dependencies": {
+      "@tiqian/core": "0.1.0-alpha.9"
+    },
+    "engines": {
+      "node": ">=22"
+    },
+    "peerDependencies": {
+      "@tiqian/precompute": "0.1.0-alpha.9",
+      "@tiqian/web-component": "0.1.0-alpha.9",
+      "astro": ">=5"
+    }
+  },
+  "name": "@tiqian/astro",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "Yorx4Hsp7yI2YNtetZ0ExQc2BK6z0ZY48wKG4q8m0V6KWh2spbKs6z9jEtclVgRyoYK4wf1ohyvrLsEM6K6Kxg==",
+  "tag": "v0.1.0-alpha.9",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.9/tiqian-astro-0.1.0-alpha.9.tgz",
+  "version": "0.1.0-alpha.9"
+}

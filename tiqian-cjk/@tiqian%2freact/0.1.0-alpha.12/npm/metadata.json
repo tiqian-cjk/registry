@@ -1,0 +1,20 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "dependencies": {
+      "@tiqian/core": "0.1.0-alpha.12"
+    },
+    "engines": {
+      "node": ">=22"
+    },
+    "peerDependencies": {
+      "react": "^18.0.0 || ^19.0.0"
+    }
+  },
+  "name": "@tiqian/react",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "uVSZan+0TqcV+RTq3daUXUBhte65r72gQxWDkZ7YBU1ZX5Esvt88FHaEMTGJJ5XuY3Y8PKsR9A20t+ey3/UhLw==",
+  "tag": "v0.1.0-alpha.12",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.12/tiqian-react-0.1.0-alpha.12.tgz",
+  "version": "0.1.0-alpha.12"
+}

@@ -1,0 +1,17 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "dependencies": {
+      "@tiqian/core": "0.1.0-alpha.11"
+    },
+    "engines": {
+      "node": ">=22"
+    }
+  },
+  "name": "@tiqian/web-component",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "3C8qXm/P0gobUOXeZnN7jPTa/nREDN/rgHS2GVT3ywZGVwcDGFDJlwWEmDbLCYahflBPDTEkHJH3CZomvopD0w==",
+  "tag": "v0.1.0-alpha.11",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.11/tiqian-web-component-0.1.0-alpha.11.tgz",
+  "version": "0.1.0-alpha.11"
+}
