@@ -1,0 +1,90 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "math-font-stix",
+      "file": "math-font-stix-0.1.0-alpha.15-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-0.1.0-alpha.15-javadoc.jar"
+    },
+    {
+      "artifactId": "math-font-stix",
+      "file": "math-font-stix-0.1.0-alpha.15-kotlin-tooling-metadata.json",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-0.1.0-alpha.15-kotlin-tooling-metadata.json"
+    },
+    {
+      "artifactId": "math-font-stix",
+      "file": "math-font-stix-0.1.0-alpha.15-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-0.1.0-alpha.15-sources.jar"
+    },
+    {
+      "artifactId": "math-font-stix",
+      "file": "math-font-stix-0.1.0-alpha.15.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-0.1.0-alpha.15.jar"
+    },
+    {
+      "artifactId": "math-font-stix",
+      "file": "math-font-stix-0.1.0-alpha.15.module",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-0.1.0-alpha.15.module"
+    },
+    {
+      "artifactId": "math-font-stix",
+      "file": "math-font-stix-0.1.0-alpha.15.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-0.1.0-alpha.15.pom"
+    },
+    {
+      "artifactId": "math-font-stix-android",
+      "file": "math-font-stix-android-0.1.0-alpha.15-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-android-0.1.0-alpha.15-javadoc.jar"
+    },
+    {
+      "artifactId": "math-font-stix-android",
+      "file": "math-font-stix-android-0.1.0-alpha.15-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-android-0.1.0-alpha.15-sources.jar"
+    },
+    {
+      "artifactId": "math-font-stix-android",
+      "file": "math-font-stix-android-0.1.0-alpha.15.aar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-android-0.1.0-alpha.15.aar"
+    },
+    {
+      "artifactId": "math-font-stix-android",
+      "file": "math-font-stix-android-0.1.0-alpha.15.module",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-android-0.1.0-alpha.15.module"
+    },
+    {
+      "artifactId": "math-font-stix-android",
+      "file": "math-font-stix-android-0.1.0-alpha.15.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-android-0.1.0-alpha.15.pom"
+    },
+    {
+      "artifactId": "math-font-stix-jvm",
+      "file": "math-font-stix-jvm-0.1.0-alpha.15-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-jvm-0.1.0-alpha.15-javadoc.jar"
+    },
+    {
+      "artifactId": "math-font-stix-jvm",
+      "file": "math-font-stix-jvm-0.1.0-alpha.15-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-jvm-0.1.0-alpha.15-sources.jar"
+    },
+    {
+      "artifactId": "math-font-stix-jvm",
+      "file": "math-font-stix-jvm-0.1.0-alpha.15.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-jvm-0.1.0-alpha.15.jar"
+    },
+    {
+      "artifactId": "math-font-stix-jvm",
+      "file": "math-font-stix-jvm-0.1.0-alpha.15.module",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-jvm-0.1.0-alpha.15.module"
+    },
+    {
+      "artifactId": "math-font-stix-jvm",
+      "file": "math-font-stix-jvm-0.1.0-alpha.15.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-font-stix-jvm-0.1.0-alpha.15.pom"
+    }
+  ],
+  "groupId": "org.tiqian",
+  "license": "MPL-2.0",
+  "name": "math-font-stix",
+  "repository": "tiqian-cjk/tiqian-math",
+  "tag": "v0.1.0-alpha.15",
+  "version": "0.1.0-alpha.15"
+}

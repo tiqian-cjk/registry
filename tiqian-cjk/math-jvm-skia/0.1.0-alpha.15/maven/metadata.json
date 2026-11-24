@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "math-jvm-skia",
+      "file": "math-jvm-skia-0.1.0-alpha.15-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-0.1.0-alpha.15-javadoc.jar"
+    },
+    {
+      "artifactId": "math-jvm-skia",
+      "file": "math-jvm-skia-0.1.0-alpha.15-kotlin-tooling-metadata.json",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-0.1.0-alpha.15-kotlin-tooling-metadata.json"
+    },
+    {
+      "artifactId": "math-jvm-skia",
+      "file": "math-jvm-skia-0.1.0-alpha.15-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-0.1.0-alpha.15-sources.jar"
+    },
+    {
+      "artifactId": "math-jvm-skia",
+      "file": "math-jvm-skia-0.1.0-alpha.15.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-0.1.0-alpha.15.jar"
+    },
+    {
+      "artifactId": "math-jvm-skia",
+      "file": "math-jvm-skia-0.1.0-alpha.15.module",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-0.1.0-alpha.15.module"
+    },
+    {
+      "artifactId": "math-jvm-skia",
+      "file": "math-jvm-skia-0.1.0-alpha.15.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-0.1.0-alpha.15.pom"
+    },
+    {
+      "artifactId": "math-jvm-skia-jvm",
+      "file": "math-jvm-skia-jvm-0.1.0-alpha.15-javadoc.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-jvm-0.1.0-alpha.15-javadoc.jar"
+    },
+    {
+      "artifactId": "math-jvm-skia-jvm",
+      "file": "math-jvm-skia-jvm-0.1.0-alpha.15-sources.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-jvm-0.1.0-alpha.15-sources.jar"
+    },
+    {
+      "artifactId": "math-jvm-skia-jvm",
+      "file": "math-jvm-skia-jvm-0.1.0-alpha.15.jar",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-jvm-0.1.0-alpha.15.jar"
+    },
+    {
+      "artifactId": "math-jvm-skia-jvm",
+      "file": "math-jvm-skia-jvm-0.1.0-alpha.15.module",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-jvm-0.1.0-alpha.15.module"
+    },
+    {
+      "artifactId": "math-jvm-skia-jvm",
+      "file": "math-jvm-skia-jvm-0.1.0-alpha.15.pom",
+      "url": "https://github.com/tiqian-cjk/tiqian-math/releases/download/v0.1.0-alpha.15/math-jvm-skia-jvm-0.1.0-alpha.15.pom"
+    }
+  ],
+  "groupId": "org.tiqian",
+  "license": "MPL-2.0",
+  "name": "math-jvm-skia",
+  "repository": "tiqian-cjk/tiqian-math",
+  "tag": "v0.1.0-alpha.15",
+  "version": "0.1.0-alpha.15"
+}
