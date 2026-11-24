@@ -9,8 +9,10 @@ TREE_DIR="$PWD/.tree"
 rm -rf "$TREE_DIR"
 mkdir -p "$TREE_DIR"
 for d in */; do
-  case "$d" in .git/|.tool-bin/|.tree/|dist/) continue ;; esac
+  case "$d" in .git/|.tool-bin/|.tree/|dist/|site/) continue ;; esac
   cp -r "$d" "$TREE_DIR/"
 done
 
 "$TOOL_DIR/registry-tool" --tree "$TREE_DIR" --output "$PWD/dist" --base-url https://registry.tiqian.org --swift-scope tiqian --archive-base https://registry-storage.tiqian.org
+
+node site/build.mjs --tree "$TREE_DIR" --catalog "$PWD/catalog.json" --out "$PWD/dist"

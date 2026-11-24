@@ -1,0 +1,96 @@
+{
+  "groups": [
+    {
+      "id": "engine",
+      "title": "ENGINE",
+      "cards": [
+        {
+          "id": "typescript",
+          "title": "TypeScript",
+          "packages": ["npm:@tiqian/engine", "npm:@tiqian/protocol", "npm:@tiqian/shared"]
+        },
+        {
+          "id": "kotlin",
+          "title": "Kotlin",
+          "packages": ["maven:org.tiqian:tiqian-engine", "maven:org.tiqian:tiqian-engine-f64", "maven:org.tiqian:tiqian-protocol"]
+        },
+        {
+          "id": "rust",
+          "title": "Rust",
+          "packages": ["cargo:tiqian-engine", "cargo:tiqian-protocol"]
+        },
+        {
+          "id": "swift",
+          "title": "Swift",
+          "packages": ["swift:tiqian-engine-f32", "swift:tiqian-engine-f64", "swift:tiqian-protocol"]
+        },
+        {
+          "id": "dart",
+          "title": "Dart",
+          "packages": ["pub:tiqian_engine", "pub:tiqian_protocol"]
+        }
+      ]
+    },
+    {
+      "id": "platform",
+      "title": "PLATFORM",
+      "cards": [
+        {
+          "id": "web",
+          "title": "Web",
+          "sections": [
+            { "title": "接入", "packages": ["npm:@tiqian/web-component", "npm:@tiqian/react"] },
+            { "title": "框架集成", "packages": ["npm:@tiqian/astro", "npm:@tiqian/sveltekit"] },
+            { "title": "构建期", "packages": ["npm:@tiqian/precompute"] },
+            { "title": "底层", "packages": ["npm:@tiqian/core", "npm:@tiqian/ffi"] }
+          ]
+        },
+        {
+          "id": "compose",
+          "title": "Compose",
+          "sections": [
+            { "title": "接入", "packages": ["maven:org.tiqian:tiqian-compose", "maven:org.tiqian:tiqian-compose-material3"] },
+            { "title": "底层", "packages": ["maven:org.tiqian:tiqian-jvm-skia"] }
+          ]
+        },
+        {
+          "id": "android",
+          "title": "Android",
+          "sections": [
+            { "title": "接入", "packages": ["maven:org.tiqian:tiqian-android-view"] },
+            {
+              "title": "底层",
+              "packages": [
+                "maven:org.tiqian:tiqian-android-rendering",
+                "maven:org.tiqian:tiqian-android-shaping",
+                "maven:org.tiqian:tiqian-android-native-font"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "markdown",
+      "title": "MARKDOWN",
+      "cards": [
+        {
+          "id": "compose",
+          "title": "Compose",
+          "packages": ["maven:org.tiqian:markdown-compose"]
+        }
+      ]
+    },
+    {
+      "id": "math",
+      "title": "MATH",
+      "cards": [
+        {
+          "id": "compose",
+          "title": "Compose",
+          "packages": ["maven:org.tiqian:math-compose"]
+        }
+      ]
+    }
+  ]
+}

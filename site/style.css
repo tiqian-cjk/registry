@@ -1,0 +1,890 @@
+/*
+ * 提椠 Registry 首页样式。
+ * 颜色、字体、页脚与大字标沿用官网（tiqian-cjk/homepage 的 src/app.css 与 SiteFooter.svelte），
+ * 两边改动时需同步。
+ */
+
+:root {
+	color-scheme: light dark;
+
+	--color-bg: #f3f2f0;
+	--color-fg: #1c1c1c;
+	--color-muted: #8a8a8a;
+	--color-field: #ffffff;
+
+	--font-sans:
+		'Inter Variable', MiSans, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
+		'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+	--font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+	--page-gutter: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+
+	/* 大字标的宽度，页眉、正文、页脚导航都以它为框（与官网页脚相同） */
+	--frame-width: min(
+		clamp(82%, calc(64% + 259.2px), calc(100% - 2 * var(--page-gutter))),
+		calc(1920px * 0.82)
+	);
+	/* 对齐线：字标里「提」字左缘再往里一点（SVG 宽 1700） */
+	--frame-alignment: calc(var(--frame-width) * 85 / 1700);
+	/* 正文左缘：窄屏与「提」对齐；宽屏与页脚标志栏对齐（标志栏悬挂在对齐线左侧） */
+	--content-inset: var(--frame-alignment);
+
+	--footer-brand-column-width: 96px;
+	--footer-column-gap: 16px;
+}
+
+@media (min-width: 1224px) {
+	:root {
+		--content-inset: calc(
+			var(--frame-alignment) - var(--footer-brand-column-width) - var(--footer-column-gap)
+		);
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-bg: #161615;
+		--color-fg: #e9e7e3;
+		--color-muted: #8e8c88;
+		--color-field: #232321;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--color-bg);
+	color: var(--color-fg);
+	font-family: var(--font-sans);
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+	margin: 0;
+}
+
+a {
+	color: inherit;
+}
+
+/* 以当前文字颜色绘制单色 SVG（同官网 InkSvg.svelte）：只取形状作遮罩，跟随亮/暗色 */
+.ink-svg {
+	display: block;
+	width: 100%;
+	background-color: currentColor;
+	-webkit-mask: var(--ink-svg-src) center / 100% 100% no-repeat;
+	mask: var(--ink-svg-src) center / 100% 100% no-repeat;
+}
+
+/* 页眉与正文共用的框：与大字标同宽、居中，左右各让出同样的 --content-inset */
+.frame {
+	width: calc(var(--frame-width) - 2 * var(--content-inset));
+	margin-inline: auto;
+}
+
+/* ---------- 页眉 ---------- */
+
+/* 页眉 logo 组的尺寸 */
+:root {
+	/* 页眉 logo 的高度（整张 SVG 画布 560 × 116 的高，宽度按比例跟着变）。手调改这里 */
+	--header-logo-height: 36px;
+	/* POWERED BY BORING PLATFORM 的高度（整张 SVG 画布 280 × 56 的高）。手调改这里 */
+	--header-boring-height: 28px;
+	/* logo 右边到 POWERED BY BORING PLATFORM 左边（按两张画布的边算）。手调改这里 */
+	--header-brand-gap: 16px;
+}
+
+.site-header {
+	/* POWERED BY BORING PLATFORM 的不透明度（正文色之上；Registry 在 SVG 里是 0.6）。手调改这里 */
+	--header-boring-opacity: 0.2;
+	/* 页眉顶部边距。手调改这里（窄屏另有一份，见文件后面的 max-width: 768px） */
+	--header-padding-top: 16px;
+	/* logo 组右边到搜索框左边的最小距离（窄的时候搜索框缩到只留这么多）。手调改这里 */
+	--header-search-gap: 32px;
+	/* 桌面搜索框最宽多少；放得下时就这么宽，靠右。手调改这里 */
+	--header-search-max-width: 512px;
+	/*
+	 * 搜索框里放大镜的大小：整张 Material Symbols 画布的边长，图标本身约占 3/4，四周有留白。
+	 * 24px 是这款图标的设计尺寸（opsz 24），笔画粗细在这个大小最准。手调改这里
+	 */
+	--header-search-icon-size: 24px;
+	/* 放大镜的不透明度（正文色之上，同 BORING 的做法，亮暗模式都跟着变）。手调改这里 */
+	--header-search-icon-opacity: 0.82;
+
+	/* 页眉底部边距（固定在顶上之后，毛玻璃底边到 logo、搜索框的距离）。手调改这里 */
+	--header-padding-bottom: 16px;
+	/* 页眉毛玻璃：背景模糊半径，和盖在上面的页面底色占多少（暗色另有一份，见下）。手调改这里 */
+	--header-backdrop-blur: 48px;
+	--header-backdrop-tint: 60%;
+
+	--header-height: 40px;
+
+	/* 滚动时固定在顶上；整条通栏，里面的内容再按 .frame 收窄 */
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	padding-block: var(--header-padding-top) var(--header-padding-bottom);
+	background: color-mix(in srgb, var(--color-bg) var(--header-backdrop-tint), transparent);
+	-webkit-backdrop-filter: blur(var(--header-backdrop-blur));
+	backdrop-filter: blur(var(--header-backdrop-blur));
+}
+
+@media (prefers-color-scheme: dark) {
+	.site-header {
+		--header-backdrop-tint: 40%;
+	}
+}
+
+.site-header__inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 24px var(--header-search-gap);
+}
+
+/*
+ * 标志与 POWERED BY BORING PLATFORM 一组，整组在页眉里垂直居中。
+ * 组内两者顶端对齐，再把 BORING 往下挪，使 BORING PLATFORM 的基线与 Registry 的基线齐平。
+ * 基线取自两张 SVG：Registry 在 y = 92（画布高 116），BORING PLATFORM 在 y = 43.94（画布高 56）。
+ * 两个高度变量怎么调，基线都保持对齐。
+ */
+.header-brand {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--header-brand-gap);
+}
+
+.brand {
+	display: block;
+	text-decoration: none;
+}
+
+/* 标志 + 提椠 + Registry 是一整张 SVG；Registry 的灰来自 SVG 里的 60% 不透明度 */
+.brand__logo {
+	width: auto;
+	height: var(--header-logo-height);
+	aspect-ratio: 560 / 116;
+	/* SVG 左侧留白：标志的圆最左端在 x = 14.5425（画布高 116），往左挪掉，让笔画而非画布对齐边缘（同页脚标志） */
+	margin-inline-start: calc(-1 * var(--header-logo-height) * 14.5425 / 116);
+}
+
+/* 链到 boring 仓库；整块可点 */
+.powered-link {
+	display: block;
+}
+
+/*
+ * POWERED BY BORING PLATFORM 是一整张 SVG（文字已转路径）。
+ * 用正文色再降不透明度，而不用 --color-muted：后者亮、暗两套几乎是同一个灰，切换时看不出变化。
+ */
+/* 用哪张图写在这里而不是 HTML 里，窄屏好换成单行的那张（见文件后面的 max-width: 768px） */
+.powered {
+	--ink-svg-src: url('/assets/powered-by-boring-platform.svg');
+	width: auto;
+	height: var(--header-boring-height);
+	aspect-ratio: 280 / 56;
+	margin-top: calc(
+		var(--header-logo-height) * 92 / 116 - var(--header-boring-height) * 43.94 / 56
+	);
+	color: var(--color-fg);
+	opacity: var(--header-boring-opacity);
+}
+
+/*
+ * 不定宽：占满 logo 组右边剩下的宽度，但不超过 --header-search-max-width；
+ * 右边贴到内容区边缘，多出来的空在搜索框左边。剩下不到 240px 时换到下一行。
+ */
+.search {
+	position: relative;
+	flex: 1 1 240px;
+	max-width: var(--header-search-max-width);
+	margin-inline-start: auto;
+}
+
+.search input {
+	width: 100%;
+	height: var(--header-height);
+	padding: 0 52px 0 16px;
+	border: 0;
+	border-radius: 12px;
+	background: var(--color-field);
+	color: inherit;
+	font: inherit;
+	font-size: 16px;
+}
+
+/* 聚焦时（点击、Tab 都一样）描一圈框：亮色下正文色的 7%，暗色下 15% */
+.search input:focus-visible {
+	outline: 2px solid color-mix(in srgb, var(--color-fg) 7%, transparent);
+	outline-offset: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+	.search input:focus-visible {
+		outline-color: color-mix(in srgb, var(--color-fg) 15%, transparent);
+	}
+}
+
+.search input::-webkit-search-cancel-button {
+	display: none;
+}
+
+/*
+ * 按图标画布量：上下边距是（框高 − 画布边长）/ 2，右边距在这之上再多 4px。
+ * 改框高或图标大小，右边始终比上下宽这 4px。
+ */
+.search svg {
+	position: absolute;
+	top: 50%;
+	right: calc((var(--header-height) - var(--header-search-icon-size)) / 2 + 4px);
+	width: var(--header-search-icon-size);
+	height: var(--header-search-icon-size);
+	opacity: var(--header-search-icon-opacity);
+	translate: 0 -50%;
+	pointer-events: none;
+}
+
+/* ---------- 分组与卡片 ---------- */
+
+.groups {
+	/*
+	 * 分组名那一栏的宽度。按页眉 logo 到 POWERED BY 的距离算是约 191.7px（logo 36px、BORING 28px 时），
+	 * 取整成 190px。手调改这里
+	 */
+	--group-label-width: 190px;
+	/* 卡片高度：固定，不再跟宽度按比例走（手机上同样）。手调改这里 */
+	--card-height: 128px;
+	/* 卡片圆角（背景色块层的裁切也用它）。手调改这里 */
+	--card-radius: 16px;
+	/* 卡片背景色块的模糊半径（直接用设计稿里的值，不按卡片大小换算）。手调改这里 */
+	--card-blob-blur: 64px;
+	/* 色块沿椭圆转一圈的时长（椭圆本身按卡片设，见 .card--kotlin）。手调改这里 */
+	--card-blob-period: 6s;
+	/* 悬停时色块淡入、移开时淡出的时长。手调改这里 */
+	--card-blob-fade: 300ms;
+	--card-gap: 16px;
+	/* 卡片最窄宽度（不设最宽，一行几张都铺满整行）。手调改这里 */
+	--card-min-width: 176px;
+
+	display: grid;
+	/* 分组之间 */
+	gap: 32px;
+	padding-block: 64px 96px;
+}
+
+.group {
+	display: grid;
+	/* 卡片那一栏用 minmax(0, 1fr)：允许比卡片网格的最小宽度还窄，卡片区才会跟着窗口缩，不会撑出右边 */
+	grid-template-columns: var(--group-label-width) minmax(0, 1fr);
+	align-items: start;
+	container-type: inline-size;
+}
+
+/* Roboto Flex 宽度 80（wdth 80）、Bold（wght 700），其余轴默认。手机上同样 16px */
+.group__title {
+	font-family: 'Roboto Flex', var(--font-sans);
+	font-stretch: 80%;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.2;
+	/* 不加上边距：标题的行框顶和右边第一张卡片的顶边齐平 */
+}
+
+/*
+ * 一行最多五张。放得下五张就五等分；放不下时按最窄 --card-min-width 能放几张就分几列，
+ * 每列再拉宽把整行铺满，右边不留空。
+ */
+.group__cards {
+	display: grid;
+	grid-template-columns: repeat(
+		auto-fill,
+		minmax(max(var(--card-min-width), (100% - 4 * var(--card-gap)) / 5), 1fr)
+	);
+	gap: var(--card-gap);
+	/* 没有卡片的分组也占一行卡片的高度，保持各组间距一致 */
+	min-height: var(--card-height);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	height: var(--card-height);
+	/* 上下 12、左右 16（手机上另设，见文件后面的 max-width: 768px） */
+	padding: 12px 16px;
+	border-radius: var(--card-radius);
+	background: var(--card-bg, #e1e3e6);
+	color: #1c1c1c;
+	font-family: var(--font-mono);
+	/* 自成一层：背景色块（z-index: -1）在卡片底色之上、文字之下 */
+	position: relative;
+	isolation: isolate;
+}
+
+/*
+ * 背景色块层：铺满卡片，按圆角裁掉模糊溢出的部分。底色加三块色块，后一块盖在前一块上。
+ * 几何（椭圆、宽度、起始角度）所有卡片共用，取自 Kotlin 设计稿（卡片 998 × 790）：
+ *  - 稿子里三块上边缘的中点约在 (13.6%, 67.1%)、(59.1%, 39.2%)、(80.9%, 69.9%)，
+ *    拟合成椭圆：中心 (47%, 68.5%)，横半径 33.6% 卡片宽，竖半径 30% 卡片高；
+ *  - 中心再往下挪到 85%、竖半径压到 15%，让色块只在底边附近转：上边缘在卡片高度的
+ *    70%–100% 之间走，最低刚好到底边，不会整块沉下去露出底色；
+ *  - 三块在椭圆上均匀相隔 120°（第一块从稿子里的 183° 起），一样宽，都是卡片宽的 73%
+ *    （理论上 72% 刚好够，椭圆是 12 个点连成的折线，多留 1%）：按转一整圈模拟过，卡片底边任何时候都不漏底色。
+ * 颜色按卡片设（见下面的 .card--*），亮暗两套。
+ */
+.card__blobs {
+	/* 椭圆和色块宽度，手调改这里 */
+	--blob-orbit-cx: 47%;
+	--blob-orbit-cy: 85%;
+	--blob-orbit-rx: 33.6cqw;
+	--blob-orbit-ry: 15cqh;
+	--blob-width: 73%;
+
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	overflow: hidden;
+	border-radius: var(--card-radius);
+	/*
+	 * 再用 clip-path 按圆角裁一次：色块是单独交给显卡的图层（模糊 + 动画），
+	 * 有的浏览器（尤其 Safari）只靠 overflow + border-radius 裁不住，圆角处会漏出模糊。
+	 */
+	clip-path: inset(0 round var(--card-radius));
+	background: var(--card-bg);
+	/* 椭圆半径用 cqw / cqh，按这一层（也就是整张卡片）的宽高算 */
+	container-type: size;
+}
+
+.card__blobs i {
+	position: absolute;
+	/* 先把上边缘中点放在椭圆中心，再由动画沿椭圆平移出去 */
+	left: calc(var(--blob-orbit-cx) - var(--blob-width) / 2);
+	top: var(--blob-orbit-cy);
+	width: var(--blob-width);
+	/* 往下伸出卡片两倍模糊半径：转到椭圆最高处，下边也不会露出底色 */
+	height: calc(100% + 2 * var(--card-blob-blur));
+	background: var(--blob-color);
+	filter: blur(var(--card-blob-blur));
+	/*
+	 * 每张卡片一个椭圆，几个色块上边缘的中点都在这个椭圆上，一起沿它转，
+	 * 彼此错开一个角度（--blob-phase，单位度，0 是椭圆最右边，顺时针增加）。
+	 * 色块本身不转、不变形，只是整块平移。只动 transform，由显卡移动，不重新布局、不重新模糊。
+	 * 椭圆用 12 个点连成，匀速走。
+	 */
+	animation: card-blob-orbit var(--card-blob-period) linear
+		calc(var(--card-blob-period) * var(--blob-phase, 0) / -360) infinite;
+	/* 平时停着（先停在起始位置），鼠标悬停在卡片上才转，移开就停在当时的位置 */
+	animation-play-state: paused;
+	will-change: transform;
+}
+
+.card__blobs i:nth-child(1) {
+	--blob-color: var(--card-blob-1);
+	--blob-phase: 183;
+}
+
+.card__blobs i:nth-child(2) {
+	--blob-color: var(--card-blob-2);
+	--blob-phase: 303;
+}
+
+.card__blobs i:nth-child(3) {
+	--blob-color: var(--card-blob-3);
+	--blob-phase: 63;
+}
+
+/*
+ * 平时只有底色，色块不显示。有鼠标的设备悬停时色块淡入并开始转，移开时淡出、停在当时的位置；
+ * 手机等没有悬停的设备一直只有底色。
+ */
+.card__blobs i {
+	opacity: 0;
+}
+
+@media (hover: hover) {
+	.card__blobs i {
+		transition: opacity var(--card-blob-fade) ease;
+	}
+
+	.card:hover .card__blobs i {
+		opacity: 1;
+	}
+}
+
+/* 转动只在系统没要求减少动态效果时才有 */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.card:hover .card__blobs i {
+		animation-play-state: running;
+	}
+}
+
+@keyframes card-blob-orbit {
+	0% {
+		transform: translate(calc(var(--blob-orbit-rx) * 1), calc(var(--blob-orbit-ry) * 0));
+	}
+
+	8.333% {
+		transform: translate(calc(var(--blob-orbit-rx) * 0.866), calc(var(--blob-orbit-ry) * 0.5));
+	}
+
+	16.667% {
+		transform: translate(calc(var(--blob-orbit-rx) * 0.5), calc(var(--blob-orbit-ry) * 0.866));
+	}
+
+	25% {
+		transform: translate(calc(var(--blob-orbit-rx) * 0), calc(var(--blob-orbit-ry) * 1));
+	}
+
+	33.333% {
+		transform: translate(calc(var(--blob-orbit-rx) * -0.5), calc(var(--blob-orbit-ry) * 0.866));
+	}
+
+	41.667% {
+		transform: translate(calc(var(--blob-orbit-rx) * -0.866), calc(var(--blob-orbit-ry) * 0.5));
+	}
+
+	50% {
+		transform: translate(calc(var(--blob-orbit-rx) * -1), calc(var(--blob-orbit-ry) * 0));
+	}
+
+	58.333% {
+		transform: translate(calc(var(--blob-orbit-rx) * -0.866), calc(var(--blob-orbit-ry) * -0.5));
+	}
+
+	66.667% {
+		transform: translate(calc(var(--blob-orbit-rx) * -0.5), calc(var(--blob-orbit-ry) * -0.866));
+	}
+
+	75% {
+		transform: translate(calc(var(--blob-orbit-rx) * 0), calc(var(--blob-orbit-ry) * -1));
+	}
+
+	83.333% {
+		transform: translate(calc(var(--blob-orbit-rx) * 0.5), calc(var(--blob-orbit-ry) * -0.866));
+	}
+
+	91.667% {
+		transform: translate(calc(var(--blob-orbit-rx) * 0.866), calc(var(--blob-orbit-ry) * -0.5));
+	}
+
+	100% {
+		transform: translate(calc(var(--blob-orbit-rx) * 1), calc(var(--blob-orbit-ry) * 0));
+	}
+}
+
+.card__title {
+	font-size: 24px;
+	font-weight: 400;
+	letter-spacing: -0.05em;
+	line-height: 1.1;
+}
+
+/*
+ * 版本号两层混合：底下一层黑字 100% 叠加（overlay），上面一层黑字 10% 正常（设计稿是 40%）。
+ * 叠加那层让字带上下面色块的颜色（落在蓝紫上偏深蓝，落在粉紫上偏深紫）。
+ * 叠加层用 ::before 按 data-version 再画一遍，盖在原文字的位置；原文字就是 10% 那层。
+ * 混合只在卡片内部发生（.card 是 isolation: isolate），不会混到页面背景。
+ */
+.card__version {
+	position: relative;
+	margin-top: 2px;
+	color: rgb(0 0 0 / 0.1);
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.3;
+}
+
+.card__version::before {
+	content: attr(data-version);
+	position: absolute;
+	inset: 0;
+	color: #000;
+	mix-blend-mode: overlay;
+	/*
+	 * 让这层也交给显卡：Safari 里色块（模糊 + 动画）在单独的显卡图层上，
+	 * 叠加层不在显卡上时找不到底下的颜色，会整个变成黑字。两边都在显卡上才能正确混合。
+	 */
+	will-change: transform;
+}
+
+/*
+ * 每张卡的颜色：底色加三块色块（--card-blob-1/2/3，对应椭圆上 183°、303°、63° 起步的三块）。
+ * 每个值用 light-dark(亮色, 暗色) 写两套，暗色模式不再盖遮罩，而是用单独调的深色。
+ * 都在 OKLCH 色彩空间里按色相算出来（生成脚本的参数见下）：
+ *  - 三块色相跨约 80°，照 Kotlin 设计稿的跨度：中间那块是主色，两侧偏 −46° 和 +34° 左右；
+ *    Dart、Web、Compose、Android 收窄到 40°–50°，冷色系跨大了显得跳；Compose 另外调暗（见它自己的注释）；
+ *  - 亮色：底色亮度 0.90、彩度 0.022（平时只露底色，要有点颜色倾向但不艳）；三块亮度 0.78–0.81、彩度 0.07–0.08（比稿子更亮、略纯，但仍偏素）；
+ *  - 暗色：底色亮度 0.32、彩度 0.022；三块亮度 0.45–0.48、彩度 0.068–0.075。
+ */
+
+/* Rust：主色 #DEA584 的琥珀色，两侧展开到玫瑰和金黄 */
+.card--rust {
+	--card-bg: light-dark(#ebdad1, #3c3029);
+	--card-blob-1: light-dark(#e2a4b1, #754550);
+	--card-blob-2: light-dark(#e9af90, #7d4e33);
+	--card-blob-3: light-dark(#dabc8e, #73592f);
+}
+
+/* Kotlin：色相取自设计稿（稿子原色 #ded9e1 / #9fa2ce / #c79dc5 / #d1a1ad，按下面的亮度重算） */
+.card--kotlin {
+	--card-bg: light-dark(#e3dae9, #37303b);
+	--card-blob-1: light-dark(#afb2e7, #4f507a);
+	--card-blob-2: light-dark(#dbacd8, #724b70);
+	--card-blob-3: light-dark(#e8afbd, #7e4d5a);
+}
+
+/* Dart：主色 #13B9FD 的天蓝，两侧只展开到青蓝和蓝（跨度收窄到约 50°，不跳到青绿） */
+.card--dart {
+	--card-bg: light-dark(#d0e1ea, #27353c);
+	--card-blob-1: light-dark(#7bc6ca, #196064);
+	--card-blob-2: light-dark(#85c8e6, #24637c);
+	--card-blob-3: light-dark(#9fc5ed, #3f6083);
+}
+
+/* Swift：主色偏红（#FD2020 和 #F05138 之间），两侧展开到品红和橙 */
+.card--swift {
+	--card-bg: light-dark(#ecd9d7, #3d2f2e);
+	--card-blob-1: light-dark(#d9a5c7, #6f4661);
+	--card-blob-2: light-dark(#edaaa7, #804948);
+	--card-blob-3: light-dark(#e6b598, #7c5239);
+}
+
+/* TypeScript：主色 #3178C6 的蓝，两侧展开到天蓝和蓝紫，比 Dart 更偏紫 */
+.card--typescript {
+	--card-bg: light-dark(#d8dee9, #2f333b);
+	--card-blob-1: light-dark(#95bed6, #385a6e);
+	--card-blob-2: light-dark(#a9bfe5, #4a5b7b);
+	--card-blob-3: light-dark(#c3bbe0, #5f5878);
+}
+
+/* Web：松石绿（色相约 185°，同 #40E0D0），三块收窄在 160°–200° 之间，不和 Dart 的天蓝挤在一起 */
+.card--web {
+	--card-bg: light-dark(#cfe3e0, #263734);
+	--card-blob-1: light-dark(#8dc7a7, #306148);
+	--card-blob-2: light-dark(#81cfc1, #1b685e);
+	--card-blob-3: light-dark(#89cfd3, #24696d);
+}
+
+/*
+ * Compose：Compose Multiplatform（同时发了 Android 和桌面 JVM 两个版本），色调偏紫，色相约 285°，
+ * 介于 TypeScript（262°）和 Kotlin（313°）之间。比别的卡片暗一点、灰一点，靠深浅和它们区分：
+ * 亮色底色亮度 0.87、色块 0.72–0.75；暗色底色亮度 0.28、色块 0.41–0.44；
+ * 彩度底色 0.012、色块 0.035–0.04。三块色相 265°、285°、307°。
+ */
+.card--compose {
+	--card-bg: light-dark(#d2d4dc, #27282f);
+	--card-blob-1: light-dark(#96a6bb, #3d4c5d);
+	--card-blob-2: light-dark(#a3a9c5, #494e66);
+	--card-blob-3: light-dark(#b0aac2, #544f64);
+}
+
+/* Android：Android 绿（#3DDC84，色相约 154°）往黄偏一点，主色 140°，三块在 118°–156° 之间，和 Web 的松石绿错开 */
+.card--android {
+	--card-bg: light-dark(#d7e2d4, #2d362b);
+	--card-blob-1: light-dark(#b3be88, #525a2d);
+	--card-blob-2: light-dark(#a3cb9a, #44653c);
+	--card-blob-3: light-dark(#9dcfae, #3c694d);
+}
+
+@media (prefers-color-scheme: dark) {
+	/* 暗色下卡片用自己的深色（见上面各卡片的 light-dark），这里只换文字颜色 */
+	.card {
+		color: #e9e7e3;
+	}
+
+	/* 暗色下同样两层，只是黑换成白：白字 10% 打底，再叠一层白色 overlay（把底下的颜色提亮） */
+	.card__version {
+		color: rgb(255 255 255 / 0.1);
+	}
+
+	.card__version::before {
+		color: #fff;
+	}
+}
+
+/* 窄屏：分组名放到卡片上方，卡片两列铺满 */
+@media (max-width: 768px) {
+	/* 窄屏页眉：前四个值含义同上面 .site-header 里的同名变量。手调改这里 */
+	.site-header {
+		--header-logo-height: 32px;
+		/* 窄屏换成只有 BORING PLATFORM 的那张 SVG（画布 270 × 36），这里是它的高。约 17.13px 时右边正好齐 Registry 的末尾 */
+		--header-boring-height: 12px;
+		--header-padding-top: 16px;
+		--header-padding-bottom: 4px;
+		/* BORING 放到 logo 下面后，提 的底边到 POWERED BY 的顶边的距离（按笔画算）。手调改这里 */
+		--header-boring-gap: 8px;
+		/* 搜索展开、收回的动画：时长和缓动曲线（输入框、放大镜、logo 组共用）。手调改这里 */
+		--header-search-duration: 180ms;
+		--header-search-easing: cubic-bezier(0.2,0,0,1);
+	}
+
+	/*
+	 * 窄屏换成只有 BORING PLATFORM 的那张（不要 POWERED BY，太小看不清），放到 logo 下面，左边与 提 对齐。
+	 * 取自两张 SVG：提 左边 x = 113.68、底边 y = 97.895（画布高 116）；
+	 * BORING PLATFORM 笔画左边 x = 9.49、顶边 y = 8.88（画布 270 × 36）。
+	 * 两个高度变量怎么调，都保持对齐。
+	 */
+	.header-brand {
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.powered {
+		--ink-svg-src: url('/assets/boring-platform.svg');
+		aspect-ratio: 270 / 36;
+		margin-top: calc(
+			var(--header-boring-gap) - var(--header-logo-height) * (116 - 97.895) / 116 -
+				var(--header-boring-height) * 8.88 / 36
+		);
+		/* 末尾的 1px：B 的竖笔比 提 的起笔看着更靠外，按笔画对齐后再往右挪一点，视觉上才齐。手调改这里 */
+		margin-inline-start: calc(
+			var(--header-logo-height) * (113.68 - 14.5425) / 116 -
+				var(--header-boring-height) * 9.49 / 36 + 1px
+		);
+	}
+
+	/*
+	 * 窄屏搜索框和 logo 在同一行，占 logo 组右边剩下的宽度（不换行）。
+	 * 剩下的宽度够 128px 就是搜索框，不够就缩成右边一个方形按钮（见下面的 @container）。
+	 */
+	.site-header__inner {
+		position: relative;
+		flex-wrap: nowrap;
+		align-items: flex-start;
+	}
+
+	/*
+	 * 竖直方向只对齐 logo 那一行，不管下面的 BORING：搜索框的中线对到 logo 整张画布的中线。
+	 */
+	.search {
+		flex: 1 1 0;
+		min-width: var(--header-height);
+		max-width: none;
+		height: var(--header-height);
+		margin-top: calc((var(--header-logo-height) - var(--header-height)) / 2);
+		/* 不当定位参照：输入框和放大镜改为相对整个页眉定位（见下） */
+		position: static;
+		container-type: inline-size;
+	}
+
+	/*
+	 * 输入框和放大镜相对整个页眉定位，而不是相对 .search。这样展开只是宽度在变，可以做成动画：
+	 * 右边一直贴着内容区右边，左边往左滑到内容区左边。
+	 * 没聚焦时宽度是 .search 的宽（100cqw，.search 是容器）；聚焦时是整个页眉的宽（100%）。
+	 * 上下位置同上面 .search 的 margin-top：中线对 logo 整张画布的中线。
+	 */
+	.search input {
+		position: absolute;
+		top: calc((var(--header-logo-height) - var(--header-height)) / 2);
+		right: 0;
+		transition:
+			width var(--header-search-duration) var(--header-search-easing),
+			padding var(--header-search-duration) var(--header-search-easing);
+	}
+
+	.search input:not(:focus) {
+		width: 100cqw;
+	}
+
+	.search svg {
+		top: calc(var(--header-logo-height) / 2);
+		transition: right var(--header-search-duration) var(--header-search-easing);
+	}
+
+	/* 只够放按钮（没聚焦时）：输入框缩成 框高 × 框高 的方块靠右，放大镜居中，不显示文字 */
+	@container (width < 128px) {
+		.search input:not(:focus) {
+			width: var(--header-height);
+			padding: 0;
+			color: transparent;
+			caret-color: transparent;
+			cursor: pointer;
+		}
+
+		.search:not(:focus-within) svg {
+			right: calc((var(--header-height) - var(--header-search-icon-size)) / 2);
+		}
+	}
+
+	/*
+	 * 点进去（搜索框或按钮都一样）：输入框往左展开成全宽，盖住整行；logo 组同时淡出，但留着位置，
+	 * 页眉高度不变。点到别处（失去焦点）就按原路收回。
+	 */
+	.header-brand {
+		transition: opacity var(--header-search-duration) var(--header-search-easing);
+	}
+
+	.site-header:has(.search:focus-within) .header-brand {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	/* 系统设置了“减少动态效果”就不做动画 */
+	@media (prefers-reduced-motion: reduce) {
+		.search input,
+		.search svg,
+		.header-brand {
+			transition: none;
+		}
+	}
+
+	.groups {
+		/*
+		 * 手机上卡片行沿用桌面的规则（放得下几张就分几列，最多五张，铺满整行），只是间距和最窄宽度另设。
+		 * 最窄 128px：再窄 12px 的版本号（约 101px）加左右内边距就放不进一行。手调改这里
+		 */
+		--card-gap: 12px;
+		--card-min-width: 128px;
+
+		/* 页眉到第一组、分组之间。手调改这里 */
+		gap: 48px;
+		padding-block: 48px 72px;
+	}
+
+	.group {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.group__cards {
+		min-height: 0;
+	}
+
+	.card {
+		/* 上下 8、左右 12 */
+		padding: 8px 12px;
+	}
+
+	/* 手机上大标题字号（桌面 24px）。手调改这里 */
+	.card__title {
+		font-size: 22px;
+	}
+}
+
+/* ---------- 页脚（同官网 SiteFooter.svelte） ---------- */
+
+.site-footer {
+	--footer-column-width: 124px;
+	--footer-row-gap: 32px;
+	--footer-text-size: 0.875rem;
+	--footer-line-height: 1.6;
+	--footer-item-gap: 8px;
+	--footer-logo-height: 24px;
+	/* 标志 SVG（288 × 115）左侧留白 x ≈ 14.958，用于让笔画而非画布对齐 */
+	--footer-logo-ink-offset: calc(var(--footer-logo-height) * 14.958 / 115);
+	--footer-navigation-gap: clamp(24px, calc(32px - 8 * (100vw - 375px) / 1065), 32px);
+
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.site-footer__navigation {
+	width: var(--frame-width);
+	margin-bottom: var(--footer-navigation-gap);
+}
+
+.site-footer__columns {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: var(--footer-row-gap) var(--footer-column-gap);
+	margin-inline-start: calc(100% * 85 / 1700);
+}
+
+.site-footer__column {
+	display: grid;
+	align-content: start;
+	gap: var(--footer-row-gap);
+	width: var(--footer-column-width);
+}
+
+@media (min-width: 1224px) {
+	.site-footer {
+		--footer-layout: wide;
+	}
+
+	.site-footer__columns {
+		margin-inline-start: calc(
+			100% * 85 / 1700 - var(--footer-brand-column-width) - var(--footer-column-gap)
+		);
+	}
+
+	.site-footer__column:first-child {
+		width: var(--footer-brand-column-width);
+	}
+}
+
+.site-footer__group h2 {
+	margin: 0 0 var(--footer-item-gap);
+	font-size: var(--footer-text-size);
+	font-weight: 650;
+	line-height: var(--footer-line-height);
+}
+
+.site-footer__brand a {
+	display: flex;
+	align-items: center;
+	width: fit-content;
+	height: calc(var(--footer-text-size) * var(--footer-line-height));
+}
+
+.site-footer__brand .ink-svg {
+	width: auto;
+	height: var(--footer-logo-height);
+	aspect-ratio: 288 / 115;
+	margin-inline-start: calc(-1 * var(--footer-logo-ink-offset));
+}
+
+.site-footer__group ul {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	gap: var(--footer-item-gap);
+	list-style: none;
+}
+
+.site-footer__group li {
+	font-size: var(--footer-text-size);
+	line-height: var(--footer-line-height);
+}
+
+/* 能点的项和不能点的项平时看起来一样，悬停时才出下划线 */
+.site-footer__group a {
+	text-decoration: none;
+	/* 下划线离字远一点；遇到字母下伸部分（g、p、y）时断开。手调改这里 */
+	text-underline-offset: 0.15em;
+	text-decoration-skip-ink: all;
+}
+
+.site-footer__group a:hover {
+	text-decoration: underline;
+}
+
+/* 字标在此裁掉下半截 */
+.site-footer__wordmark-frame {
+	width: var(--frame-width);
+	aspect-ratio: 1700 / 322;
+	overflow: hidden;
+}
+
+.site-footer__wordmark-frame .ink-svg {
+	aspect-ratio: 1700 / 480;
+}
