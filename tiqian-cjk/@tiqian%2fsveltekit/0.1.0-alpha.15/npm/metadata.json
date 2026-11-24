@@ -1,0 +1,23 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "dependencies": {
+      "@tiqian/core": "0.1.0-alpha.15"
+    },
+    "engines": {
+      "node": ">=22"
+    },
+    "peerDependencies": {
+      "@sveltejs/kit": "^2.0.0 || ^3.0.0",
+      "@tiqian/precompute": "0.1.0-alpha.15",
+      "@tiqian/web-component": "0.1.0-alpha.15",
+      "svelte": ">=5"
+    }
+  },
+  "name": "@tiqian/sveltekit",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "w6vNW6PvR7cR659SqgH2/2oCwZjqHkFk99qEtRCruRjuAfcBDlF8OIPK8ToTxjz++bQnLR+sygCDES2Im7SHDA==",
+  "tag": "v0.1.0-alpha.15",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.15/tiqian-sveltekit-0.1.0-alpha.15.tgz",
+  "version": "0.1.0-alpha.15"
+}

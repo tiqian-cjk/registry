@@ -1,0 +1,17 @@
+{
+  "license": "MPL-2.0",
+  "manifest": {
+    "cpu": [
+      "x64"
+    ],
+    "os": [
+      "win32"
+    ]
+  },
+  "name": "@tiqian/precompute-win32-x64-msvc",
+  "repository": "tiqian-cjk/tiqian",
+  "sha512": "HrrJ2c6k+XSPX+ItRAofpkMEn8oQv1fCj1XxCFTyAI1rGV54H5tgz0nUD05ipanV+dgZCGG7zjA5J1fU4wyD3Q==",
+  "tag": "v0.1.0-alpha.15",
+  "url": "https://github.com/tiqian-cjk/tiqian/releases/download/v0.1.0-alpha.15/tiqian-precompute-win32-x64-msvc-0.1.0-alpha.15.tgz",
+  "version": "0.1.0-alpha.15"
+}
