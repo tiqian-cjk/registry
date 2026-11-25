@@ -1,0 +1,9 @@
+/* MiSans Medium（MiSans VF wght 380）的子集，只含：协本源版码议。由 site/misans-medium.py 生成，别手改 */
+@font-face {
+  font-family: 'MiSans Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(./misans-medium-labels.woff2) format('woff2');
+  unicode-range: U+534F, U+672C, U+6E90, U+7248, U+7801, U+8BAE;
+}

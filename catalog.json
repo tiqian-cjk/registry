@@ -39,7 +39,7 @@
           "id": "web",
           "title": "Web",
           "sections": [
-            { "title": "接入", "packages": ["npm:@tiqian/web-component", "npm:@tiqian/react"] },
+            { "title": "组件", "packages": ["npm:@tiqian/web-component", "npm:@tiqian/react"] },
             { "title": "框架集成", "packages": ["npm:@tiqian/astro", "npm:@tiqian/sveltekit"] },
             { "title": "构建期", "packages": ["npm:@tiqian/precompute"] },
             { "title": "底层", "packages": ["npm:@tiqian/core", "npm:@tiqian/ffi"] }
@@ -49,7 +49,7 @@
           "id": "compose",
           "title": "Compose",
           "sections": [
-            { "title": "接入", "packages": ["maven:org.tiqian:tiqian-compose", "maven:org.tiqian:tiqian-compose-material3"] },
+            { "title": "组件", "packages": ["maven:org.tiqian:tiqian-compose", "maven:org.tiqian:tiqian-compose-material3"] },
             { "title": "底层", "packages": ["maven:org.tiqian:tiqian-jvm-skia"] }
           ]
         },
@@ -57,7 +57,7 @@
           "id": "android",
           "title": "Android",
           "sections": [
-            { "title": "接入", "packages": ["maven:org.tiqian:tiqian-android-view"] },
+            { "title": "组件", "packages": ["maven:org.tiqian:tiqian-android-view"] },
             {
               "title": "底层",
               "packages": [

@@ -9,24 +9,36 @@
 		<!--
 			字体都放在自己这里（assets/fonts/），不走外部 CDN：
 			与官网同款的 Inter（西文）、MiSans（汉字）；卡片用 JetBrains Mono；
-			分组标题用 Roboto Flex 的静态实例（wdth 80、wght 700，其余轴默认）。
+			分组标题用 Roboto Flex 的静态实例（wdth 80、wght 700，其余轴默认），
+			其中的汉字用文渊黑体 wdth 87.5、wght 600 的子集（Registry Label SC，由 site/subset-label-font.py 生成）。
 		-->
 		<link rel="stylesheet" href="/assets/fonts/inter/inter.css" />
 		<link rel="stylesheet" href="/assets/fonts/jetbrains-mono/jetbrains-mono.css" />
 		<link rel="stylesheet" href="/assets/fonts/misans/MiSans-Regular.min.css" />
 		<link rel="stylesheet" href="/assets/fonts/misans/MiSans-Semibold.min.css" />
+		<!-- 详情页大卡片右下角「版本、源码、协议」用的 MiSans Medium 子集（site/misans-medium.py） -->
+		<link rel="stylesheet" href="/assets/fonts/misans-medium/misans-medium.css" />
 		<link rel="stylesheet" href="/assets/fonts/roboto-flex/roboto-flex.css" />
+		<link rel="stylesheet" href="/assets/fonts/registry-label-sc/registry-label-sc.css" />
+		<!-- 提椠排的说明文字用的 Inter 静态实例（构建期预排不支持可变字体，见 site/static-inter.py） -->
+		<link rel="stylesheet" href="/assets/fonts/inter-static/inter-static.css" />
 		<link rel="stylesheet" href="/assets/style.css" />
+		<!-- 详情页：提椠构建期预排的数据，由 site/build.mjs 填入 -->
+<!-- head -->
 	</head>
 	<body>
 		<header class="site-header">
 			<div class="site-header__inner frame">
 				<div class="header-brand">
 					<a class="brand" href="/" aria-label="提椠 Registry">
-						<span class="ink-svg brand__logo" style="--ink-svg-src: url('/assets/registry-wordmark-and-logo.svg')" aria-hidden="true"></span>
+						<!-- 标志和「提椠」实色；「Registry」两层混合（见 style.css 的 .ink-blend） -->
+						<span class="brand__logo" aria-hidden="true">
+							<span class="ink-svg" style="--ink-svg-src: url('/assets/registry-mark.svg')"></span>
+							<span class="ink-blend brand__word" style="--ink-svg-src: url('/assets/registry-word.svg')"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
+						</span>
 					</a>
 					<a class="powered-link" href="https://github.com/Losses/boring" aria-label="Powered by Boring Platform">
-						<span class="ink-svg powered" aria-hidden="true"></span>
+						<span class="ink-blend powered" aria-hidden="true"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
 					</a>
 				</div>
 				<form class="search" role="search" onsubmit="return false">
@@ -39,9 +51,8 @@
 			</div>
 		</header>
 
-		<main class="groups frame">
-<!-- groups -->
-		</main>
+		<!-- 主体：首页是分组卡片，详情页是单张卡片的包列表，由 site/build.mjs 填入 -->
+<!-- main -->
 
 		<footer class="site-footer">
 			<nav class="site-footer__navigation" aria-label="页脚导航">
@@ -105,5 +116,12 @@
 		</footer>
 
 		<script src="/assets/footer.js"></script>
+		<script src="/assets/snippet.js"></script>
+		<script src="/assets/back.js"></script>
+		<script src="/assets/versions.js"></script>
+		<!-- 提椠排版（构建时打包到 /assets/tiqian/，见 site/vite.config.mjs）：页面上有 <tiqian-prose> 才加载 -->
+		<script type="module">
+			if (document.querySelector('tiqian-prose')) import('/assets/tiqian/tiqian.js').catch(() => {});
+		</script>
 	</body>
 </html>
