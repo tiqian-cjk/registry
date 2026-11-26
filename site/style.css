@@ -145,10 +145,13 @@ a {
  * 两层的参数（--ink-backdrop：底层把背后压暗 / 提亮到几倍；--ink-base-alpha：上层的不透明度）
  * 是在浏览器里实测反推的：背后就是纯底色时，叠出来的颜色等于原来的灰度
  * （Registry 是正文色 60%，POWERED BY 是 20%），差不到两个色阶。背后有彩色内容滚过时才带上颜色。
- * 暗色下 Registry 的上层用 50%：只用 10% 的话底层要提亮 6 倍，背后一有彩色就冲成白的
+ * 暗色下 Registry 的上层用 50%：只用 10% 的话底层要提亮 6 倍，背后一有彩色就冲成白的。
+ * --ink-saturate：底层加饱和的倍数。亮色下背后的卡片颜色很淡、又隔着六成底色的毛玻璃，1.8 倍几乎看不出颜色，
+ * 用 6 倍；再高的话纯底色（偏暖的 #f3f2f0）上的灰也会被拉成橄榄色。暗色下颜色本来就明显，留在 1.8。手调改这里
  */
 .ink-blend {
 	display: block;
+	--ink-saturate: 6;
 }
 
 .brand__word {
@@ -172,8 +175,8 @@ a {
 .ink-blend__overlay {
 	/* 字形本身不上色，只用来裁背后的滤镜 */
 	background-color: transparent;
-	-webkit-backdrop-filter: brightness(var(--ink-backdrop)) saturate(1.8);
-	backdrop-filter: brightness(var(--ink-backdrop)) saturate(1.8);
+	-webkit-backdrop-filter: brightness(var(--ink-backdrop)) saturate(var(--ink-saturate));
+	backdrop-filter: brightness(var(--ink-backdrop)) saturate(var(--ink-saturate));
 }
 
 .ink-blend__base {
@@ -181,6 +184,10 @@ a {
 }
 
 @media (prefers-color-scheme: dark) {
+	.ink-blend {
+		--ink-saturate: 1.8;
+	}
+
 	.brand__word {
 		--ink-backdrop: 1.727;
 		--ink-base-alpha: 0.5;
