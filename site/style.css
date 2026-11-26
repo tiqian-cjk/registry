@@ -1311,7 +1311,7 @@ a {
 	margin: -4px 0 0 -8px;
 	/*
 	 * 和卡片圆角同心：按钮方块离卡片上边、左边的距离（--back-inset）加上按钮圆角等于卡片圆角。
-	 * 桌面内边距 12 / 16，往左上挪 4 / 8，离边 8px；手机内边距 8 / 12，离边 4px（见文件后面的 max-width: 768px）
+	 * 内边距 12 / 16（手机上也一样），往左上挪 4 / 8，离边 8px
 	 */
 	--back-inset: 8px;
 	border-radius: calc(var(--card-radius) - var(--back-inset));
@@ -2065,8 +2065,8 @@ a {
 		min-height: 160px;
 		/* 手机上大卡片占满一行，两边都和文字对齐，两边都往外多出 --optical-outset */
 		margin-inline: calc(-1 * var(--optical-outset));
-		/* 同首页卡片在手机上的内边距：上下 8、左右 12 */
-		padding: 8px 12px;
+		/* 内边距同桌面（上下 12、左右 16），文字离卡片边比首页手机卡片宽松一点。手调改这里 */
+		padding: 12px 16px;
 	}
 
 	/* 包卡片同顶部大卡片，手机上内边距也小一号 */
@@ -2075,13 +2075,13 @@ a {
 		--package-pad-x: 12px;
 	}
 
-	/* 内边距小了 4px，返回按钮离卡片边也只剩 4px，圆角跟着变大才同心 */
-	.detail__back {
-		--back-inset: 4px;
+	/* 手机上大卡片里的组名和标题都缩小一点（桌面 16px、40px）。手调改这里 */
+	.detail__group {
+		font-size: 14px;
 	}
 
 	.detail__title {
-		font-size: 32px;
+		font-size: 28px;
 	}
 
 	.detail__section {
