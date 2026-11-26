@@ -1330,8 +1330,38 @@ a {
 	padding-top: var(--optical-outset);
 }
 
+/* 「配置仓库」和右边选包管理器的下拉（versions.js） */
+.detail__setup-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 4px;
+}
+
+/* 下拉的底色（悬停时）是圆角容器，和下面的代码框一样往右出 --optical-outset，右边和代码框对齐 */
+.detail__manager {
+	margin-inline-end: calc(-1 * var(--optical-outset));
+}
+
+/* 字用 Inter（不是版本号那样的等宽），箭头在右边：右内边距留出箭头的位置。.package__select 写在后面，这里多带一个类压过它 */
+.package__select.detail__manager-select {
+	padding: 2px 22px 2px 6px;
+	font-family: var(--font-sans);
+}
+
+.package__chevron.detail__manager-chevron {
+	left: auto;
+	right: 4px;
+}
+
+/* 选中的包管理器那一块（见 build.mjs）：不另起一层，里面的说明和代码框照常排在右栏里 */
+.detail__setup-variant:not([hidden]) {
+	display: contents;
+}
+
 .detail__setup-title {
-	margin: 0 0 4px;
+	margin: 0;
 	font-family: 'Roboto Flex', 'Registry Label SC', var(--font-sans);
 	font-stretch: 80%;
 	font-size: 16px;
@@ -1615,6 +1645,11 @@ a {
 	counter-reset: line;
 }
 
+/* 浏览器自带样式给 <code> 写了 font-family: monospace，会盖掉上面继承下来的 JetBrains Mono */
+.snippet__code code {
+	font: inherit;
+}
+
 /* 行号：样式画的，选中和复制都不会带上 */
 /* 每行两栏：行号一栏，代码（.snippet__text）一栏；代码折行时续行和上一行的代码对齐，不会缩到行号底下 */
 .snippet__line {
@@ -1712,7 +1747,8 @@ a {
 		calc(var(--package-pad-top) + var(--version-baseline-shift, 0px) - var(--package-pad-x)) 0 16px;
 	display: inline-flex;
 	align-items: center;
-	gap: 2px;
+	/* 下拉和 ↗ 挨着：两个都有自己的悬停底色和内边距，不另加间距 */
+	gap: 0;
 }
 
 .package__picker {
@@ -1727,6 +1763,8 @@ a {
 	-webkit-appearance: none;
 	margin: 0;
 	padding: 2px 6px 2px 22px;
+	/* 宽度跟着选中的那项走（不按最长的选项）；不支持的浏览器由 versions.js 按文字宽度设 */
+	field-sizing: content;
 	border: 0;
 	border-radius: 6px;
 	background: none;

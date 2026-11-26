@@ -104,7 +104,17 @@ function lookup(packages, ref, where) {
 
 // ---------- 接入写法 ----------
 
-// 每个生态：先把本站加成仓库（setup），再按包写依赖（dependency）
+// npm 仓库的几种包管理器：配置写到哪个文件（setup），装包的命令（dependency）
+const npmrc = { file: '.npmrc', code: `@tiqian:registry=${BASE}/npm/` };
+const npmManager = (id, setup, install) => ({
+	id,
+	setupHint: `复制以下内容到您项目根目录的 ${setup.file} 文件，以使用提椠 Registry 中提供的包。`,
+	setup: () => setup,
+	dependency: (name, version) => ({ code: install(`${name}@${version}`) })
+});
+
+// 每个生态：先把本站加成仓库（setup），再按包写依赖（dependency）。
+// 有 managers 的（npm）按包管理器各有一套 setupHint、setup、dependency，见 variantsOf
 const ECOSYSTEMS = {
 	maven: {
 		label: 'Gradle',
@@ -122,14 +132,25 @@ const ECOSYSTEMS = {
 	},
 	npm: {
 		label: 'npm',
-		setupHint: '复制以下内容到您项目根目录的 .npmrc 文件，以使用提椠 Registry 中提供的包。',
 		mirror: {
 			name: 'NPM',
 			href: 'https://www.npmjs.com/org/tiqian',
 			note: '在绝大多数情况下，包内容和更新速度与提椠 Registry 相同。'
 		},
-		setup: () => ({ file: '.npmrc', code: `@tiqian:registry=${BASE}/npm/` }),
-		dependency: (name, version) => ({ code: `npm install ${name}@${version}` })
+		// 几种包管理器共用 npm 仓库，配置和安装命令各不相同。「配置仓库」右边的下拉选一种（versions.js），
+		// 第一种是默认的（没有脚本时就显示它）
+		managers: [
+			npmManager('npm', npmrc, (spec) => `npm install ${spec}`),
+			npmManager('pnpm', npmrc, (spec) => `pnpm add ${spec}`),
+			// Yarn 2 及以后不读 .npmrc（Yarn 1 读，照 npm 那样配也行）
+			npmManager(
+				'yarn',
+				{ file: '.yarnrc.yml', code: `npmScopes:\n  tiqian:\n    npmRegistryServer: "${BASE}/npm/"` },
+				(spec) => `yarn add ${spec}`
+			),
+			npmManager('bun', { file: 'bunfig.toml', code: `[install.scopes]\ntiqian = "${BASE}/npm/"` }, (spec) => `bun add ${spec}`),
+			npmManager('deno', npmrc, (spec) => `deno add npm:${spec}`)
+		]
 	},
 	cargo: {
 		label: 'Cargo',
@@ -163,16 +184,21 @@ const ECOSYSTEMS = {
 	}
 };
 
+// 一个生态的几种写法：有 managers 的就是那几种包管理器，没有的只有一种（id 为 null）
+const variantsOf = (eco) => eco.managers ?? [{ id: null, setupHint: eco.setupHint, setup: eco.setup, dependency: eco.dependency }];
+
 // Material Symbols（Outlined，grade 0、opsz 24，不填充；Apache-2.0）。字重默认 400，个别注明的是 500
 const ICONS = {
 	arrowBack: 'M313-440l224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z',
-	// arrowOutward 和 unfoldMore 跟在 Medium、Semibold 的小字后面，用 500 字重，不然显得细
+	// arrowOutward 跟在 Medium、Semibold 的小字后面，用 500 字重，不然显得细
 	arrowOutward: 'M258.39-232.11 194.5-296 573-674.5H236.89v-91h491v491h-91v-336.11l-378.5 378.5Z',
 	contentCopy:
 		'M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z',
 	check: 'M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z',
+	// expandMore、unfoldMore 跟着下拉里的 Semibold 字，用 600 字重
+	expandMore: 'M480-327.48 221.91-585.57 296-659.65l184 184 184-184 74.09 74.08L480-327.48Z',
 	unfoldMore:
-		'M480-112.35 291.63-300.72l65.65-65.41L480-243.41l122.72-122.72 65.65 65.41L480-112.35ZM357.28-590.59 291.63-656 480-844.37 668.37-656l-65.65 65.41L480-713.3 357.28-590.59Z'
+		'M480-101.91 280.22-301.7l76.08-75.52L480-253.52l123.7-123.7 76.08 75.52L480-101.91ZM356.3-580.48 280.22-656 480-855.78 679.78-656l-76.08 75.52L480-704.17 356.3-580.48Z'
 };
 const icon = (name, className = 'icon') =>
 	`<svg class="${className}" viewBox="0 -960 960 960" aria-hidden="true"><path fill="currentColor" d="${ICONS[name]}" /></svg>`;
@@ -181,7 +207,7 @@ const icon = (name, className = 'icon') =>
 
 // 构建时用 Shiki 切词，按 TextMate 作用域分几类上色（颜色在 style.css 的 .tok-*，亮色暗色各一套）：
 //   string 字符串和值，func 函数名和命令名，key 键名和参数标签，keyword 关键字，quiet 标点（调淡），comment 注释
-const SNIPPET_LANGS = ['kotlin', 'toml', 'swift', 'shellscript', 'ini'];
+const SNIPPET_LANGS = ['kotlin', 'toml', 'swift', 'shellscript', 'ini', 'yaml'];
 const highlighter = await createHighlighter({
 	themes: [createCssVariablesTheme({ name: 'css-variables', variablePrefix: '--shiki-' })],
 	langs: SNIPPET_LANGS
@@ -192,7 +218,7 @@ function tokenKind(scopes) {
 	if (/\bcomment\b/.test(scope)) return 'comment';
 	if (/string\.quoted|punctuation\.definition\.string/.test(scope)) return 'string';
 	if (/entity\.name\.(command|function)|support\.function/.test(scope)) return 'func';
-	if (/variable\.other\.(key|assignment)|keyword\.other\.definition|entity\.name\.section/.test(scope)) return 'key';
+	if (/variable\.other\.(key|assignment)|keyword\.other\.definition|entity\.name\.section|entity\.name\.tag\.yaml/.test(scope)) return 'key';
 	if (/storage\.(modifier|type)|keyword\.(control|other)/.test(scope)) return 'keyword';
 	if (/punctuation|keyword\.operator/.test(scope)) return 'quiet';
 	return null;
@@ -205,6 +231,7 @@ function langOf(file) {
 	if (file.endsWith('.toml')) return 'toml';
 	if (file.endsWith('.swift')) return 'swift';
 	if (file === '.npmrc') return 'ini';
+	if (file.endsWith('.yml') || file.endsWith('.yaml')) return 'yaml';
 	return null;
 }
 
@@ -394,13 +421,17 @@ function renderPackage(level, pkg) {
 
 	// 依赖写法，作为卡片的第二行（同一排的卡片只共用包名那一行的高度，见 style.css 的 .package）
 	out.push(`${indent(level + 1)}<div class="package__body">`);
-	out.push(renderSnippet(level + 2, eco.dependency(pkg.name, current)));
-	// 每个版本的写法预先生成好，切换版本时 versions.js 拿来换掉代码框里的内容
-	if (versions.length > 1) {
-		for (const version of versions) {
-			out.push(
-				`${indent(level + 2)}<template class="package__variant" data-version="${escape(version)}">${snippetCode(eco.dependency(pkg.name, version))}</template>`
-			);
+	const variants = variantsOf(eco);
+	out.push(renderSnippet(level + 2, variants[0].dependency(pkg.name, current)));
+	// 每个版本（和每种包管理器）的写法预先生成好，切换时 versions.js 拿来换掉代码框里的内容
+	if (versions.length > 1 || variants.length > 1) {
+		for (const variant of variants) {
+			const manager = variant.id ? ` data-manager="${escape(variant.id)}"` : '';
+			for (const version of versions) {
+				out.push(
+					`${indent(level + 2)}<template class="package__variant" data-version="${escape(version)}"${manager}>${snippetCode(variant.dependency(pkg.name, version))}</template>`
+				);
+			}
 		}
 	}
 	out.push(`${indent(level + 1)}</div>`);
@@ -457,7 +488,7 @@ async function prepareProse(html, id, widthPx) {
 
 // 右栏（配置仓库）并排时多宽：代码最长那行正好放下（左右内边距各 12px；行号是 Inter 等宽数字，
 // 13px 每位按 0.649em 算，后面隔 10px；
-// JetBrains Mono 13px 每个字宽按 0.603em 算，实测约 0.602em），再向上取整到正文字号 14px 的整数倍，
+// JetBrains Mono 13px 每个字宽按 0.603em 算，实测 0.600em，留一点余量），再向上取整到正文字号 14px 的整数倍，
 // 这样说明文字每行正好排满整数个汉字。预排也按这个宽度排
 const setupWidthPx = (code) => {
 	const lines = code.split('\n');
@@ -486,7 +517,8 @@ async function renderDetail(group, card, packages) {
 	// 写给样式用的（见 style.css 的 .detail__top）：
 	//   --version-chars：版本号几个字，据此算卡片最窄多宽
 	//   --setup-width：右栏并排时多宽（见 setupWidthPx）
-	const setupWidth = Math.max(...ecos.map((eco) => setupWidthPx(ECOSYSTEMS[eco].setup().code)));
+	// 只按默认那种写法算：别的包管理器的配置更长时，代码框里折行（比如 .yarnrc.yml）
+	const setupWidth = Math.max(...ecos.map((eco) => setupWidthPx(variantsOf(ECOSYSTEMS[eco])[0].setup().code)));
 	out.push(
 		`${indent(3)}<div class="detail__top" style="--version-chars: ${version.length}; --setup-width: ${setupWidth}px">`
 	);
@@ -519,28 +551,59 @@ async function renderDetail(group, card, packages) {
 
 	// 右边：配置仓库。一张卡里的包通常同一个生态，混了几个就各写一段
 	out.push(`${indent(4)}<section class="detail__setup" aria-labelledby="setup">`);
-	out.push(`${indent(5)}<h2 class="detail__setup-title" id="setup">配置仓库</h2>`);
+	// 标题右边：选包管理器的下拉（只有 npm 这类有几种包管理器的生态才有）。没有脚本时藏着，只显示默认那种
+	const managers = ecos.flatMap((eco) => ECOSYSTEMS[eco].managers ?? []);
+	out.push(`${indent(5)}<div class="detail__setup-header">`);
+	out.push(`${indent(6)}<h2 class="detail__setup-title" id="setup">配置仓库</h2>`);
+	if (managers.length > 1) {
+		// 和包卡片的版本下拉同一套样子，只是字用 Inter、箭头（chevron）放右边（见 style.css 的 .detail__manager）
+		out.push(`${indent(6)}<span class="package__picker detail__manager" hidden>`);
+		out.push(`${indent(7)}<select class="package__select detail__manager-select" aria-label="包管理器">`);
+		for (const manager of managers) out.push(`${indent(8)}<option value="${escape(manager.id)}">${escape(manager.id)}</option>`);
+		out.push(`${indent(7)}</select>`);
+		out.push(`${indent(7)}${icon('expandMore', 'package__chevron detail__manager-chevron')}`);
+		out.push(`${indent(6)}</span>`);
+	}
+	out.push(`${indent(5)}</div>`);
 	for (const eco of ecos) {
-		const { label, setupHint, mirror, aside, setup } = ECOSYSTEMS[eco];
+		const { label, mirror, aside } = ECOSYSTEMS[eco];
 		if (ecos.length > 1) out.push(`${indent(5)}<h3 class="detail__subheading">${escape(label)}</h3>`);
-		// 说明文字交给提椠排版（<tiqian-prose>，脚本见 site/tiqian.js）；没有脚本时照常由浏览器排
-		const paragraphs = [`<p class="detail__setup-text">${escape(setupHint)}</p>`];
-		if (mirror) {
-			paragraphs.push(
-				`<p class="detail__setup-text">您也可以使用我们发布在 <a href="${escape(mirror.href)}">${escape(mirror.name)}</a> 中的版本。${escape(mirror.note)}</p>`
-			);
+		// 配置一样的包管理器（npm、pnpm、deno 都用 .npmrc）合成一份，data-managers 写上都是哪几种
+		const groups = new Map();
+		for (const variant of variantsOf(ECOSYSTEMS[eco])) {
+			const setup = variant.setup();
+			const key = `${variant.setupHint}\0${setup.file}\0${setup.code}`;
+			if (!groups.has(key)) groups.set(key, { ...variant, setup, ids: [] });
+			if (variant.id) groups.get(key).ids.push(variant.id);
 		}
-		if (aside) paragraphs.push(`<p class="detail__setup-text">${aside}</p>`);
-		const prose = await prepareProse(
-			paragraphs.join(`\n${indent(6)}`),
-			`tq-setup-${group.id}-${card.id}-${eco}`,
-			setupWidth
-		);
-		head.push(prose.head);
-		out.push(`${indent(5)}<tiqian-prose class="detail__prose"${prose.attributes}>`);
-		out.push(`${indent(6)}${prose.html}`);
-		out.push(`${indent(5)}</tiqian-prose>`);
-		out.push(renderSnippet(5, setup()));
+		let first = true;
+		for (const { setupHint, setup, ids } of groups.values()) {
+			// 说明文字交给提椠排版（<tiqian-prose>，脚本见 site/tiqian.js）；没有脚本时照常由浏览器排
+			const paragraphs = [`<p class="detail__setup-text">${escape(setupHint)}</p>`];
+			if (mirror) {
+				paragraphs.push(
+					`<p class="detail__setup-text">您也可以使用我们发布在 <a href="${escape(mirror.href)}">${escape(mirror.name)}</a> 中的版本。${escape(mirror.note)}</p>`
+				);
+			}
+			if (aside) paragraphs.push(`<p class="detail__setup-text">${aside}</p>`);
+			const prose = await prepareProse(
+				paragraphs.join(`\n${indent(7)}`),
+				`tq-setup-${group.id}-${card.id}-${eco}${ids.length ? `-${ids[0]}` : ''}`,
+				setupWidth
+			);
+			head.push(prose.head);
+			// 不分包管理器的生态不包这一层
+			const level = ids.length ? 6 : 5;
+			if (ids.length) {
+				out.push(`${indent(5)}<div class="detail__setup-variant" data-managers="${escape(ids.join(' '))}"${first ? '' : ' hidden'}>`);
+			}
+			out.push(`${indent(level)}<tiqian-prose class="detail__prose"${prose.attributes}>`);
+			out.push(`${indent(level + 1)}${prose.html}`);
+			out.push(`${indent(level)}</tiqian-prose>`);
+			out.push(renderSnippet(level, setup));
+			if (ids.length) out.push(`${indent(5)}</div>`);
+			first = false;
+		}
 	}
 	out.push(`${indent(4)}</section>`);
 	out.push(`${indent(3)}</div>`);
