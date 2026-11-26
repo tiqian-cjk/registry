@@ -1675,10 +1675,18 @@ a {
 }
 
 .package__name {
+	/*
+	 * 包名折成两行时的行高（正文的 1.6 折行后太松）。单行时的高度和基线不变：
+	 * 行高收掉的部分在上下各补回一半（内边距），版本号的基线对齐（.package__version）照旧。手调改这里
+	 */
+	--package-name-line-height: 1.3;
+
 	margin: 0;
+	padding-block: calc((1.6 - var(--package-name-line-height)) * 16px / 2);
 	font-family: var(--font-mono);
 	font-size: 16px;
 	font-weight: 500;
+	line-height: var(--package-name-line-height);
 	overflow-wrap: anywhere;
 }
 
