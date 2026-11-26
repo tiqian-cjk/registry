@@ -658,7 +658,14 @@ async function renderDetail(group, card, packages) {
 	});
 
 	out.push(`${indent(2)}</main>`);
-	return { main: out.join('\n'), head: head.filter(Boolean).join('\n') };
+	// 页面描述（<meta name="description"> 和分享预览）：这张卡里有哪些包、最新版本
+	const description = format(t.meta.detailDescription, {
+		card: card.title,
+		group: group.title,
+		packages: all.map((p) => p.name).join(t.meta.listSeparator),
+		version
+	});
+	return { main: out.join('\n'), head: head.filter(Boolean).join('\n'), description };
 }
 
 // ---------- 输出 ----------
@@ -680,7 +687,10 @@ for (const slot of ['<!-- main -->', '<!-- head -->']) {
 
 // 页面：模板里的 {{t.xxx}} 换成当前语言的文案（转义），{{名字}} 换成下面算好的 HTML（原样）。
 // pagePath 是不带语言前缀的路径（/ 或 /<组>/<卡片>/），用来算各语言版本的地址
-function page(main, pagePath, title, head = '') {
+// 分享预览（Open Graph）里的语言写法
+const OG_LOCALES = { 'zh-Hans': 'zh_CN', 'zh-Hant': 'zh_TW', en: 'en_US' };
+
+function page(main, pagePath, title, head = '', description = t.meta.description) {
 	const hrefs = Object.fromEntries(locales.map((target) => [target, localizePath(target, pagePath)]));
 	// 页脚「语言」一栏：同一页的各语言版本，当前语言不做成链接（同官网）
 	const languageItem = (target, indentLevel) => {
@@ -705,6 +715,24 @@ function page(main, pagePath, title, head = '') {
 		// 搜索引擎用：同一页的各语言版本
 		alternates: locales
 			.map((target) => `\t\t<link rel="alternate" hreflang="${target}" href="${BASE}${hrefs[target]}" />`)
+			.concat(`\t\t<link rel="alternate" hreflang="x-default" href="${BASE}${hrefs[defaultLocale]}" />`)
+			.join('\n'),
+		description: escape(description),
+		// 规范地址和分享预览（Open Graph、Twitter）。还没有预览图，Twitter 用不带大图的 summary
+		social: [
+			`<link rel="canonical" href="${BASE}${hrefs[locale]}" />`,
+			`<meta property="og:type" content="website" />`,
+			`<meta property="og:site_name" content="${escape(t.siteName)}" />`,
+			`<meta property="og:title" content="${escape(title ?? t.siteName)}" />`,
+			`<meta property="og:description" content="${escape(description)}" />`,
+			`<meta property="og:url" content="${BASE}${hrefs[locale]}" />`,
+			`<meta property="og:locale" content="${OG_LOCALES[locale]}" />`,
+			...locales
+				.filter((target) => target !== locale)
+				.map((target) => `<meta property="og:locale:alternate" content="${OG_LOCALES[target]}" />`),
+			`<meta name="twitter:card" content="summary" />`
+		]
+			.map((line) => `\t\t${line}`)
 			.join('\n'),
 		languageItems: locales.map((target) => languageItem(target, 8)).join('\n'),
 		// 放不下语言一栏时的原生下拉：值是那种语言的同一页
@@ -756,9 +784,9 @@ for (const target of locales) {
 	write(path.join(root, 'index.html'), page(renderGroups(catalog, packages), '/'));
 	for (const group of catalog.groups) {
 		for (const card of group.cards) {
-			const { main, head } = await renderDetail(group, card, packages);
+			const { main, head, description } = await renderDetail(group, card, packages);
 			const pagePath = `/${group.id}/${card.id}/`;
-			write(path.join(root, group.id, card.id, 'index.html'), page(main, pagePath, `${group.title} / ${card.title}`, head));
+			write(path.join(root, group.id, card.id, 'index.html'), page(main, pagePath, `${group.title} / ${card.title}`, head, description));
 			if (locale === defaultLocale) details++;
 		}
 	}

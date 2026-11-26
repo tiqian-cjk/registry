@@ -1,7 +1,9 @@
 /* 草稿：用词待定稿。結構同 zh-Hans.mjs；頁尾那段照抄官網的 zh-Hant.ts */
 export default {
 	meta: {
-		description: '提槧的套件儲存庫。'
+		description: '提槧的套件儲存庫。',
+		detailDescription: '{card}（{group}）的提槧套件：{packages}。最新版本 {version}。',
+		listSeparator: '、'
 	},
 	siteName: '提槧 Registry',
 	tiqianHomeLabel: '提槧首頁',

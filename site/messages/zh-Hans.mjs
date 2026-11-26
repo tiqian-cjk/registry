@@ -5,7 +5,10 @@
  */
 export default {
 	meta: {
-		description: '提椠的软件包仓库。'
+		description: '提椠的软件包仓库。',
+		/* 详情页的描述（搜索结果和分享预览里显示）：{packages} 是这张卡里的包名，用 listSeparator 连起来 */
+		detailDescription: '{card}（{group}）的提椠包：{packages}。最新版本 {version}。',
+		listSeparator: '、'
 	},
 	siteName: '提椠 Registry',
 	tiqianHomeLabel: '提椠首页',

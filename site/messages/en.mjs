@@ -1,7 +1,9 @@
 /* Draft. Same structure as zh-Hans.mjs; the footer follows the main site's en.ts, but Tíqiàn always carries its tone marks */
 export default {
 	meta: {
-		description: 'The package registry for Tíqiàn.'
+		description: 'The package registry for Tíqiàn.',
+		detailDescription: 'Tíqiàn packages for {card} ({group}): {packages}. Latest version {version}.',
+		listSeparator: ', '
 	},
 	siteName: 'Tíqiàn Registry',
 	tiqianHomeLabel: 'Tíqiàn home',
