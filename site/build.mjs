@@ -2,6 +2,7 @@
 // 填进 site/index.html，与样式、脚本、图标一起写到输出目录。
 //   首页：/index.html，各组的卡片，每张卡显示组内包的最新版本
 //   详情页：/<组>/<卡片>/index.html，这张卡里每个包的接入写法（可以切换版本）
+// 每种语言各一套（见 site/i18n.mjs）：简体中文在根路径，其余在 /en/、/zh-Hant/ 下；样式、脚本、字体共用 /assets/
 // 用法：node site/build.mjs --tree <元数据树> --catalog <catalog.json> --out <输出目录>
 
 import fs from 'node:fs';
@@ -9,6 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHtmlPreparer, renderSnapshotServerAssets } from '@tiqian/precompute/precompute-html';
 import { createCssVariablesTheme, createHighlighter } from 'shiki';
+import { defaultLocale, format, localeNames, localizePath, locales, messages, missingKeys } from './i18n.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -90,12 +92,19 @@ const escape = (s) =>
 
 const indent = (n) => '\t'.repeat(n);
 
+// 正在生成哪种语言的页面，和这种语言的文案（见 site/messages/）。输出时按语言挨个换
+let locale = defaultLocale;
+let t = messages[defaultLocale];
+
 // 驼峰处（小写后接大写，如 TypeScript）允许折行：放不下整个词时在这里断开，而不是从词中间断
 const camelBreaks = (title) => escape(title).replace(/([a-z])(?=[A-Z])/g, '$1<wbr>');
 
+// catalog.json 里的分区名（简体中文）换成当前语言的（见 site/messages/ 的 sections）
+const sectionTitle = (title) => t.sections[title] ?? fail(`site/messages/${locale}.mjs 的 sections 里缺「${title}」`);
+
 // 卡片里的包：有分区的（平台卡片）按分区，没有的整张卡算一个不带标题的分区
 const sectionsOf = (card) => card.sections ?? [{ packages: card.packages }];
-const cardHref = (group, card) => `/${group.id}/${card.id}/`;
+const cardHref = (group, card) => localizePath(locale, `/${group.id}/${card.id}/`);
 // 详情页里每张包卡片的锚点（搜索结果点包名时直接滚到这张卡），比如 @tiqian/react → package-tiqian-react
 const packageAnchor = (name) => `package-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
@@ -110,21 +119,22 @@ function lookup(packages, ref, where) {
 const npmrc = { file: '.npmrc', code: `@tiqian:registry=${BASE}/npm/` };
 const npmManager = (id, setup, install) => ({
 	id,
-	setupHint: `复制以下内容到您项目根目录的 ${setup.file} 文件，以使用提椠 Registry 中提供的包。`,
+	setupHint: () => format(t.setup.copyToRoot, { file: setup.file }),
 	setup: () => setup,
 	dependency: (name, version) => ({ code: install(`${name}@${version}`) })
 });
 
 // 每个生态：先把本站加成仓库（setup），再按包写依赖（dependency）。
-// 有 managers 的（npm）按包管理器各有一套 setupHint、setup、dependency，见 variantsOf
+// 有 managers 的（npm）按包管理器各有一套 setupHint、setup、dependency，见 variantsOf。
+// 说明文字在 site/messages/ 里：setupHint 按当前语言取；mirror.note、aside 是 t.setup.notes、t.setup.asides 里的键
 const ECOSYSTEMS = {
 	maven: {
 		label: 'Gradle',
-		setupHint: '复制以下内容到您项目的 settings.gradle.kts 文件，以使用提椠 Registry 中提供的包。',
+		setupHint: () => format(t.setup.copyTo, { file: 'settings.gradle.kts' }),
 		mirror: {
 			name: 'Maven Central',
 			href: 'https://mvnrepository.com/artifact/org.tiqian',
-			note: '由于 Maven Central 的配额限制，我们只在其中提供稳定和较大更新的版本。'
+			note: 'maven'
 		},
 		setup: () => ({
 			file: 'settings.gradle.kts',
@@ -137,7 +147,7 @@ const ECOSYSTEMS = {
 		mirror: {
 			name: 'NPM',
 			href: 'https://www.npmjs.com/org/tiqian',
-			note: '在绝大多数情况下，包内容和更新速度与提椠 Registry 相同。'
+			note: 'npm'
 		},
 		// 几种包管理器共用 npm 仓库，配置和安装命令各不相同。「配置仓库」右边的下拉选一种（versions.js），
 		// 第一种是默认的（没有脚本时就显示它）
@@ -156,10 +166,9 @@ const ECOSYSTEMS = {
 	},
 	cargo: {
 		label: 'Cargo',
-		setupHint: '复制以下内容到您项目的 .cargo/config.toml 文件，以使用提椠 Registry 中提供的包。',
-		// 配置说明后面再加的一段（HTML，原样输出）
-		aside:
-			'您也可以使用<a href="https://github.com/tiqian-cjk/tiqian-rs">提椠 Rust</a>，一个原生使用 Rust 编写的版本，来获得更好的性能与内存管理。其行为可能与提椠有些许不同。',
+		setupHint: () => format(t.setup.copyTo, { file: '.cargo/config.toml' }),
+		// 配置说明后面再加的一段（提椠 Rust）
+		aside: 'cargo',
 		setup: () => ({
 			file: '.cargo/config.toml',
 			code: `[registries.tiqian]\nindex = "sparse+${BASE}/cargo/index/"`
@@ -171,13 +180,13 @@ const ECOSYSTEMS = {
 	},
 	pub: {
 		label: 'pub',
-		setupHint: '在终端中运行以下命令，以使用提椠 Registry 中提供的包。',
+		setupHint: () => t.setup.runInTerminal,
 		setup: () => ({ code: `export PUB_HOSTED_URL=${BASE}/pub` }),
 		dependency: (name, version) => ({ code: `dart pub add ${name}:${version}` })
 	},
 	swift: {
 		label: 'Swift Package Registry',
-		setupHint: '在终端中运行以下命令，以使用提椠 Registry 中提供的包。',
+		setupHint: () => t.setup.runInTerminal,
 		setup: () => ({ code: `swift package-registry set ${BASE}/swift/` }),
 		dependency: (name, version) => ({
 			file: 'Package.swift',
@@ -305,9 +314,10 @@ const blend = (html) =>
 function renderSnippet(level, { file, code }) {
 	const out = [`${indent(level)}<figure class="snippet">`];
 	out.push(`${indent(level + 1)}<figcaption class="snippet__header">`);
-	out.push(`${indent(level + 2)}<span class="snippet__file">${escape(file ?? '终端')}</span>`);
+	out.push(`${indent(level + 2)}<span class="snippet__file">${escape(file ?? t.snippet.terminal)}</span>`);
+	// 复制成功后读屏念的「已复制」也放在按钮上（data-copied），snippet.js 换上去
 	out.push(
-		`${indent(level + 2)}<button class="snippet__copy" type="button" aria-label="复制" hidden>${icon('contentCopy', 'snippet__icon')}${icon('check', 'snippet__icon snippet__icon--done')}</button>`
+		`${indent(level + 2)}<button class="snippet__copy" type="button" aria-label="${escape(t.snippet.copy)}" data-copied="${escape(t.snippet.copied)}" hidden>${icon('contentCopy', 'snippet__icon')}${icon('check', 'snippet__icon snippet__icon--done')}</button>`
 	);
 	out.push(`${indent(level + 1)}</figcaption>`);
 	// <pre> 里不能有缩进，否则会原样显示
@@ -399,12 +409,12 @@ function renderPackage(level, pkg) {
 	// 切换版本时下面代码框的写法跟着换。只有一个版本的包不做切换
 	out.push(`${indent(level + 2)}<div class="package__version">`);
 	out.push(
-		`${indent(level + 3)}<a class="package__release" href="${escape(release(current))}" aria-label="${escape(current)} 的发布页">${escape(current)}</a>`
+		`${indent(level + 3)}<a class="package__release" href="${escape(release(current))}" aria-label="${escape(format(t.detail.releasePage, { version: current }))}">${escape(current)}</a>`
 	);
 	if (versions.length > 1) {
 		out.push(`${indent(level + 3)}<span class="package__picker" hidden>`);
 		out.push(`${indent(level + 4)}${icon('unfoldMore', 'package__chevron')}`);
-		out.push(`${indent(level + 4)}<select class="package__select" aria-label="${escape(pkg.name)} 的版本">`);
+		out.push(`${indent(level + 4)}<select class="package__select" aria-label="${escape(format(t.detail.versionsOf, { name: pkg.name }))}">`);
 		for (const version of versions) {
 			out.push(
 				`${indent(level + 5)}<option value="${escape(version)}" data-release="${escape(release(version))}">${escape(version)}</option>`
@@ -413,7 +423,7 @@ function renderPackage(level, pkg) {
 		out.push(`${indent(level + 4)}</select>`);
 		out.push(`${indent(level + 3)}</span>`);
 		out.push(
-			`${indent(level + 3)}<a class="package__release-link" href="${escape(release(current))}" aria-label="${escape(current)} 的发布页" hidden>${icon('arrowOutward', 'package__release-icon')}</a>`
+			`${indent(level + 3)}<a class="package__release-link" href="${escape(release(current))}" aria-label="${escape(format(t.detail.releasePage, { version: current }))}" data-label="${escape(t.detail.releasePage)}" hidden>${icon('arrowOutward', 'package__release-icon')}</a>`
 		);
 	}
 	out.push(`${indent(level + 2)}</div>`);
@@ -447,30 +457,50 @@ function renderPackage(level, pkg) {
 // 浏览器里右栏正好是 --setup-width 那么宽、字体也对得上时，直接用这份结果，不用等脚本重排；
 // 对不上（比如手机上）就照常由脚本在浏览器里排。字体和字号要和 style.css 的 .detail__prose 一致。
 // 预排不支持可变字体，所以西文用 Inter 的静态实例（site/static-inter.py）。
+// 字体（fontFamilies）和 locale 按语言另给，见 PROSE_FONTS 和 prepareProse
 const PROSE_TYPOGRAPHY = {
-	fontFamilies: ['Inter Static', 'MiSans'],
 	fontSizePx: 14,
 	lineHeightPx: 14 * 1.6,
-	locale: 'zh-Hans',
 	fontWeight: 400
 };
-const PROSE_FONT_STYLESHEETS = ['fonts/inter-static/inter-static.css', 'fonts/misans/MiSans-Regular.min.css'];
+// 繁中页面以繁中版 MiSansTC 为主、简中版补字（同官网，原因见 style.css 的 :lang(zh-Hant)），其他语言反过来
+const PROSE_FONTS = {
+	'zh-Hant': {
+		families: ['Inter Static', 'MiSansTC', 'MiSans'],
+		stylesheets: ['fonts/inter-static/inter-static.css', 'fonts/misans-tc/MiSansTC-Regular.min.css', 'fonts/misans/MiSans-Regular.min.css']
+	},
+	default: {
+		families: ['Inter Static', 'MiSans'],
+		stylesheets: ['fonts/inter-static/inter-static.css', 'fonts/misans/MiSans-Regular.min.css']
+	}
+};
 // 预排表（每页一份，按内容哈希命名）放在这里，<tiqian-prose> 的 tq-tables 指过来
 const TABLES_DIR = 'assets/tiqian-tables';
 
-let preparer;
+const PRECOMPUTE_LOCALES = ['zh-Hans'];
+// 每种语言一个预排器（字体和 locale 不同）
+const preparers = new Map();
 const proseTables = new Map();
 
 // 返回 { attributes, html, head }：<tiqian-prose> 上加的属性、预排后的段落（加了 data-tq-snapshot-key）、
 // 要放进 <head> 的数据。预排失败只提示，段落照原样输出，交给浏览器里的脚本排
 async function prepareProse(html, id, widthPx) {
-	preparer ??= await createHtmlPreparer({
-		fontStylesheets: PROSE_FONT_STYLESHEETS.map((file) => ({
-			source: path.join(here, 'assets', file),
-			publicUrl: `/assets/${file}`
-		})),
-		typography: PROSE_TYPOGRAPHY
-	});
+	// @tiqian/precompute 目前只能预排简体中文（别的 locale 报 UnsupportedSnapshotLocale），其他语言交给浏览器里的脚本排
+	if (!PRECOMPUTE_LOCALES.includes(locale)) return { attributes: '', html, head: '' };
+	if (!preparers.has(locale)) {
+		const fonts = PROSE_FONTS[locale] ?? PROSE_FONTS.default;
+		preparers.set(
+			locale,
+			await createHtmlPreparer({
+				fontStylesheets: fonts.stylesheets.map((file) => ({
+					source: path.join(here, 'assets', file),
+					publicUrl: `/assets/${file}`
+				})),
+				typography: { ...PROSE_TYPOGRAPHY, fontFamilies: fonts.families, locale }
+			})
+		);
+	}
+	const preparer = preparers.get(locale);
 	let prepared;
 	try {
 		prepared = await preparer.prepare(html, { id, snapshot: { maxWidthPx: widthPx } });
@@ -533,21 +563,21 @@ async function renderDetail(group, card, packages) {
 		`${indent(5)}<div class="card__blobs" aria-hidden="true"><div class="card__blobs-layer"><i></i><i></i><i></i></div></div>`
 	);
 	out.push(
-		`${indent(5)}<a class="detail__back" href="/#group-${escape(group.id)}" aria-label="返回首页">${icon('arrowBack', 'detail__back-icon')}</a>`
+		`${indent(5)}<a class="detail__back" href="${localizePath(locale, '/')}#group-${escape(group.id)}" aria-label="${escape(t.detail.back)}">${icon('arrowBack', 'detail__back-icon')}</a>`
 	);
 	out.push(`${indent(5)}<div class="detail__name">`);
 	out.push(`${indent(6)}<p class="detail__group">${blend(escape(group.title))}</p>`);
 	out.push(`${indent(6)}<h1 class="detail__title">${camelBreaks(card.title)}</h1>`);
 	out.push(`${indent(5)}</div>`);
 	out.push(`${indent(5)}<dl class="detail__facts">`);
-	out.push(`${indent(6)}<div><dt>版本</dt><dd class="detail__facts-version">${blend(escape(version))}</dd></div>`);
+	out.push(`${indent(6)}<div><dt>${escape(t.detail.version)}</dt><dd class="detail__facts-version">${blend(escape(version))}</dd></div>`);
 	for (const repository of repositories) {
 		const label = repositories.length > 1 ? repository : 'GitHub';
 		out.push(
-			`${indent(6)}<div><dt>源码</dt><dd><a href="https://github.com/${escape(repository)}" aria-label="${escape(label)}">${blend(`${escape(label)}${icon('arrowOutward', 'detail__facts-icon')}`)}</a></dd></div>`
+			`${indent(6)}<div><dt>${escape(t.detail.source)}</dt><dd><a href="https://github.com/${escape(repository)}" aria-label="${escape(label)}">${blend(`${escape(label)}${icon('arrowOutward', 'detail__facts-icon')}`)}</a></dd></div>`
 		);
 	}
-	if (licenses.length) out.push(`${indent(6)}<div><dt>协议</dt><dd>${blend(escape(licenses.join(' / ')))}</dd></div>`);
+	if (licenses.length) out.push(`${indent(6)}<div><dt>${escape(t.detail.license)}</dt><dd>${blend(escape(licenses.join(' / ')))}</dd></div>`);
 	out.push(`${indent(5)}</dl>`);
 	out.push(`${indent(4)}</header>`);
 
@@ -556,11 +586,11 @@ async function renderDetail(group, card, packages) {
 	// 标题右边：选包管理器的下拉（只有 npm 这类有几种包管理器的生态才有）。没有脚本时藏着，只显示默认那种
 	const managers = ecos.flatMap((eco) => ECOSYSTEMS[eco].managers ?? []);
 	out.push(`${indent(5)}<div class="detail__setup-header">`);
-	out.push(`${indent(6)}<h2 class="detail__setup-title" id="setup">配置仓库</h2>`);
+	out.push(`${indent(6)}<h2 class="detail__setup-title" id="setup">${escape(t.detail.setup)}</h2>`);
 	if (managers.length > 1) {
 		// 和包卡片的版本下拉同一套样子，只是字用 Inter、箭头（chevron）放右边（见 style.css 的 .detail__manager）
 		out.push(`${indent(6)}<span class="package__picker detail__manager" hidden>`);
-		out.push(`${indent(7)}<select class="package__select detail__manager-select" aria-label="包管理器">`);
+		out.push(`${indent(7)}<select class="package__select detail__manager-select" aria-label="${escape(t.detail.packageManager)}">`);
 		for (const manager of managers) out.push(`${indent(8)}<option value="${escape(manager.id)}">${escape(manager.id)}</option>`);
 		out.push(`${indent(7)}</select>`);
 		out.push(`${indent(7)}${icon('expandMore', 'package__chevron detail__manager-chevron')}`);
@@ -574,8 +604,9 @@ async function renderDetail(group, card, packages) {
 		const groups = new Map();
 		for (const variant of variantsOf(ECOSYSTEMS[eco])) {
 			const setup = variant.setup();
-			const key = `${variant.setupHint}\0${setup.file}\0${setup.code}`;
-			if (!groups.has(key)) groups.set(key, { ...variant, setup, ids: [] });
+			const setupHint = variant.setupHint();
+			const key = `${setupHint}\0${setup.file}\0${setup.code}`;
+			if (!groups.has(key)) groups.set(key, { setupHint, setup, ids: [] });
 			if (variant.id) groups.get(key).ids.push(variant.id);
 		}
 		let first = true;
@@ -584,13 +615,16 @@ async function renderDetail(group, card, packages) {
 			const paragraphs = [`<p class="detail__setup-text">${escape(setupHint)}</p>`];
 			if (mirror) {
 				paragraphs.push(
-					`<p class="detail__setup-text">您也可以使用我们发布在 <a href="${escape(mirror.href)}">${escape(mirror.name)}</a> 中的版本。${escape(mirror.note)}</p>`
+					`<p class="detail__setup-text">${format(escape(t.setup.mirror), {
+						link: `<a href="${escape(mirror.href)}">${escape(mirror.name)}</a>`,
+						note: escape(t.setup.notes[mirror.note])
+					})}</p>`
 				);
 			}
-			if (aside) paragraphs.push(`<p class="detail__setup-text">${aside}</p>`);
+			if (aside) paragraphs.push(`<p class="detail__setup-text">${t.setup.asides[aside]}</p>`);
 			const prose = await prepareProse(
 				paragraphs.join(`\n${indent(7)}`),
-				`tq-setup-${group.id}-${card.id}-${eco}${ids.length ? `-${ids[0]}` : ''}`,
+				`tq-setup-${locale}-${group.id}-${card.id}-${eco}${ids.length ? `-${ids[0]}` : ''}`,
 				setupWidth
 			);
 			head.push(prose.head);
@@ -614,7 +648,7 @@ async function renderDetail(group, card, packages) {
 	sections.forEach((section, i) => {
 		const id = `packages-${i}`;
 		out.push(`${indent(3)}<section class="detail__section" aria-labelledby="${id}">`);
-		out.push(`${indent(4)}<h2 class="detail__heading" id="${id}">${escape(section.title ?? '包')}</h2>`);
+		out.push(`${indent(4)}<h2 class="detail__heading" id="${id}">${escape(section.title === undefined ? t.detail.packages : sectionTitle(section.title))}</h2>`);
 		// 同一组的包名一起折行：--section-name-chars 是组里最长的全名（前缀加包名）几个字（见 style.css 的 .package__base）
 		const fullChars = Math.max(...section.packages.map((p) => p.name.length));
 		out.push(`${indent(4)}<div class="detail__packages" style="--section-name-chars: ${fullChars}">`);
@@ -633,15 +667,65 @@ const args = parseArgs(process.argv.slice(2));
 const catalog = JSON.parse(fs.readFileSync(args.catalog, 'utf8'));
 const packages = readTree(args.tree);
 
+// 其他语言的文案缺了键就别往下走了（缺的地方会显示成 undefined）
+for (const target of locales) {
+	const missing = missingKeys(messages[defaultLocale], messages[target]);
+	if (missing.length) fail(`site/messages/${target}.mjs 缺这些文案：${missing.join('、')}`);
+}
+
 const template = fs.readFileSync(path.join(here, 'index.html'), 'utf8');
 for (const slot of ['<!-- main -->', '<!-- head -->']) {
 	if (!template.includes(slot)) fail(`site/index.html 里缺少 ${slot} 占位`);
 }
-const page = (main, title, head = '') =>
-	template
+
+// 页面：模板里的 {{t.xxx}} 换成当前语言的文案（转义），{{名字}} 换成下面算好的 HTML（原样）。
+// pagePath 是不带语言前缀的路径（/ 或 /<组>/<卡片>/），用来算各语言版本的地址
+function page(main, pagePath, title, head = '') {
+	const hrefs = Object.fromEntries(locales.map((target) => [target, localizePath(target, pagePath)]));
+	// 页脚「语言」一栏：同一页的各语言版本，当前语言不做成链接（同官网）
+	const languageItem = (target, indentLevel) => {
+		const label = escape(localeNames[target]);
+		const content =
+			target === locale
+				? `<span aria-current="true">${label}</span>`
+				: `<a href="${hrefs[target]}" hreflang="${target}">${label}</a>`;
+		return `${indent(indentLevel)}<li lang="${target}">${content}</li>`;
+	};
+	const vars = {
+		lang: locale,
+		title: escape(title ? `${title} — ${t.siteName}` : t.siteName),
+		home: localizePath(locale, '/'),
+		// 官网的语言首页是 /en、/zh-Hant（不带结尾的斜杠）
+		tiqianHome: locale === defaultLocale ? 'https://tiqian.org/' : `https://tiqian.org/${locale}`,
+		searchBase: locale === defaultLocale ? '' : `/${locale}`,
+		// 标志按语言换：英文是拼音「Tíqiàn」，繁中是「提槧」（尺寸差异见 style.css 的 .site-header:lang(…) 和 .site-footer:lang(…)）
+		brandMark: { en: '/assets/registry-mark-en.svg', 'zh-Hant': '/assets/registry-mark-hant.svg' }[locale] ?? '/assets/registry-mark.svg',
+		brandWord: locale === 'en' ? '/assets/registry-word-en.svg' : '/assets/registry-word.svg',
+		brandLogo: { en: '/assets/brand-en.svg', 'zh-Hant': '/assets/brand-hant.svg' }[locale] ?? '/assets/brand.svg',
+		// 搜索引擎用：同一页的各语言版本
+		alternates: locales
+			.map((target) => `\t\t<link rel="alternate" hreflang="${target}" href="${BASE}${hrefs[target]}" />`)
+			.join('\n'),
+		languageItems: locales.map((target) => languageItem(target, 8)).join('\n'),
+		// 放不下语言一栏时的原生下拉：值是那种语言的同一页
+		languageOptions: locales
+			.map(
+				(target) =>
+					`${indent(6)}<option value="${hrefs[target]}" lang="${target}"${target === locale ? ' selected' : ''}>${escape(localeNames[target])}</option>`
+			)
+			.join('\n')
+	};
+	const lookupMessage = (key) => {
+		const value = key.split('.').reduce((node, part) => node?.[part], t);
+		if (typeof value !== 'string') fail(`site/index.html 里的 {{t.${key}}} 在文案里找不到`);
+		return escape(value);
+	};
+	return template
 		.replace('<!-- main -->', main)
 		.replace('<!-- head -->', head)
-		.replace('<title>提椠 Registry</title>', `<title>${title ? `${escape(title)} — ` : ''}提椠 Registry</title>`);
+		.replace(/\{\{t\.([\w.]+)\}\}/g, (_, key) => lookupMessage(key))
+		.replace(/\{\{(\w+)\}\}/g, (match, name) => (name in vars ? vars[name] : fail(`site/index.html 里的 ${match} 不认识`)));
+}
 
 // 小标题里的汉字来自文渊黑体的子集，只有 site/subset-label-font.py 切进去的那些字
 const labelFontCss = fs.readFileSync(path.join(here, 'assets/fonts/registry-label-sc/registry-label-sc.css'), 'utf8');
@@ -650,7 +734,7 @@ const labelChars = new Set(
 );
 const missingLabelChars = new Set();
 const checkLabels = (html) => {
-	for (const match of html.matchAll(/class="(?:group__title|detail__group|detail__heading)"[^>]*>(.*?)<\/(?:h2|p)>/g)) {
+	for (const match of html.matchAll(/class="(?:group__title|detail__group|detail__heading|detail__setup-title)"[^>]*>(.*?)<\/(?:h2|p)>/g)) {
 		for (const char of match[1].replace(/<[^>]*>/g, '')) {
 			if (char.codePointAt(0) >= 0x2e80 && !labelChars.has(char)) missingLabelChars.add(char);
 		}
@@ -663,9 +747,27 @@ const write = (file, html) => {
 	fs.writeFileSync(file, html);
 };
 
-write(path.join(args.out, 'index.html'), page(renderGroups(catalog, packages)));
+// 每种语言输出一套：简体中文在根目录，其余在 <语言>/ 下
+let details = 0;
+for (const target of locales) {
+	locale = target;
+	t = messages[target];
+	const root = path.join(args.out, locale === defaultLocale ? '' : locale);
+	write(path.join(root, 'index.html'), page(renderGroups(catalog, packages), '/'));
+	for (const group of catalog.groups) {
+		for (const card of group.cards) {
+			const { main, head } = await renderDetail(group, card, packages);
+			const pagePath = `/${group.id}/${card.id}/`;
+			write(path.join(root, group.id, card.id, 'index.html'), page(main, pagePath, `${group.title} / ${card.title}`, head));
+			if (locale === defaultLocale) details++;
+		}
+	}
+}
+locale = defaultLocale;
+t = messages[defaultLocale];
 
-// 搜索用的索引（search.js 第一次用到时取）：每张卡片一条（标题、分组），每个包一条（全名、在哪张卡片）
+// 搜索用的索引（search.js 第一次用到时取）：每张卡片一条（标题、分组），每个包一条（全名、在哪张卡片）。
+// 各语言共用一份：地址不带语言前缀，search.js 按当前页面的语言补上（搜索框上的 data-base）
 const searchIndex = { cards: [], packages: [] };
 for (const group of catalog.groups) {
 	for (const card of group.cards) {
@@ -679,17 +781,7 @@ for (const group of catalog.groups) {
 		}
 	}
 }
-let details = 0;
-for (const group of catalog.groups) {
-	for (const card of group.cards) {
-		const title = `${group.title} / ${card.title}`;
-		const { main, head } = await renderDetail(group, card, packages);
-		write(path.join(args.out, group.id, card.id, 'index.html'), page(main, title, head));
-		details++;
-	}
-}
-
-preparer?.close();
+for (const preparer of preparers.values()) preparer.close();
 highlighter.dispose();
 fs.mkdirSync(path.join(args.out, TABLES_DIR), { recursive: true });
 for (const [file, bytes] of proseTables) fs.writeFileSync(path.join(args.out, TABLES_DIR, file), bytes);
@@ -701,7 +793,7 @@ for (const file of ['style.css', 'footer.js', 'snippet.js', 'back.js', 'versions
 // 连同子目录一起复制（字体放在 assets/fonts/ 下）
 fs.cpSync(path.join(here, 'assets'), assets, { recursive: true });
 
-console.log(`site/build.mjs: 首页和 ${details} 个详情页已写到 ${args.out}`);
+console.log(`site/build.mjs: ${locales.join('、')} 各一套首页和 ${details} 个详情页已写到 ${args.out}`);
 if (missingLabelChars.size) {
 	console.warn(
 		`site/build.mjs: 小标题字体缺这些字，会退回 MiSans：${[...missingLabelChars].join('')}。重跑 site/subset-label-font.py`,

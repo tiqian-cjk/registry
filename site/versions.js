@@ -55,7 +55,8 @@ for (const card of document.querySelectorAll('.package')) {
 		render(card);
 		const option = select.selectedOptions[0];
 		link.href = option.dataset.release;
-		link.setAttribute('aria-label', `${select.value} 的发布页`);
+		// 「{version} 的发布页」按页面语言写在 data-label 上（见 build.mjs 的 renderPackage）
+		link.setAttribute('aria-label', link.dataset.label.replace('{version}', select.value));
 	});
 }
 

@@ -1,7 +1,8 @@
 /*
  * 页眉的搜索：边输边在搜索框下面列出匹配的卡片（按分组列，分组名当小标题）和包，点了（或回车）进详情页；包会直接滚到它那张卡。
  * 搜卡片标题、分组名（搜 PLATFORM 列出这组的卡片）、包的全名。不分大小写；空格隔开的几个词都要对上。
- * 索引由 build.mjs 写在 /assets/search-index.json，第一次聚焦时才取。
+ * 索引由 build.mjs 写在 /assets/search-index.json，第一次聚焦时才取。各语言共用，地址不带语言前缀，
+ * 这里补上当前语言的（搜索框上的 data-base）；几句提示也按页面语言写在搜索框的 data-* 上（见 index.html）。
  * 没有脚本时下拉里只有一句提示（见 index.html），这里加上 .search--ready 把提示换成结果列表。
  * 键盘：↑ ↓ 选，回车打开，Esc 先清空、再按一次离开搜索框。
  */
@@ -66,7 +67,9 @@ if (form && input && list) {
 		return { cards: cards.slice(0, MAX_CARDS), packages: packages.slice(0, MAX_PACKAGES) };
 	};
 
-	const option = (href, title, meta) => {
+	const base = form.dataset.base ?? '';
+	const option = (path, title, meta) => {
+		const href = base + path;
 		const i = options.length;
 		options.push(href);
 		const metaHtml = meta ? `<span class="search__meta">${meta}</span>` : '';
@@ -90,7 +93,7 @@ if (form && input && list) {
 			return;
 		}
 		if (index.failed) {
-			list.innerHTML = '<li class="search__empty" role="presentation">搜索暂时用不了，请稍后再试。</li>';
+			list.innerHTML = `<li class="search__empty" role="presentation">${escape(form.dataset.failed)}</li>`;
 			return;
 		}
 		const { cards, packages } = search(query);
@@ -106,13 +109,15 @@ if (form && input && list) {
 			for (const card of members) html.push(option(card.href, `<span class="search__title">${escape(card.title)}</span>`));
 		}
 		if (packages.length) {
-			html.push('<li class="search__heading" role="presentation">包</li>');
+			html.push(`<li class="search__heading" role="presentation">${escape(form.dataset.packages)}</li>`);
 			for (const pkg of packages) {
 				const name = `<span class="search__title search__title--package"><span class="search__scope">${escape(pkg.scope)}</span>${escape(pkg.base)}</span>`;
 				html.push(option(pkg.href, name, `${escape(pkg.group)} / ${escape(pkg.card)}`));
 			}
 		}
-		if (!html.length) html.push(`<li class="search__empty" role="presentation">没有找到「${escape(query)}」</li>`);
+		if (!html.length) {
+			html.push(`<li class="search__empty" role="presentation">${escape(form.dataset.empty).replace('{query}', escape(query))}</li>`);
+		}
 		list.innerHTML = html.join('');
 	};
 

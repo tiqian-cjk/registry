@@ -1,16 +1,18 @@
 """
 从文渊黑体（WenYuan Sans SC Flex VF）切出小标题用的中文字体：
-宽度 87.5（wdth 87.5）、SemiBold（wght 600），只留 catalog.json 标题和 build.mjs 里写死的小标题用到的汉字。
+宽度 87.5（wdth 87.5）、SemiBold（wght 600），只留小标题用到的汉字：catalog.json 的标题，
+和各语言文案（site/messages/）里的小标题（配置仓库、包、各分区名）。
 
     python3 -m pip install fonttools brotli uharfbuzz skia-pathops
     python3 site/subset-label-font.py ~/Library/Fonts/WenYuanSansSCFlexVF.otf
 
-catalog.json 里新增中文标题后要重跑一次；build.mjs 发现缺字会提示。
+catalog.json 里新增中文标题、或者文案里的小标题改了字之后要重跑一次（要装 Node）；build.mjs 发现缺字会提示。
 字体按 SIL OFL 1.1 授权，'WenYuan Sans'、'文渊黑体' 是保留字体名，
 修改过的版本不能用这个名字，所以子集改名为 Registry Label SC。
 """
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,8 +31,21 @@ weight = 600
 width_percent = 87.5
 file_name = 'registry-label-sc-wdth87.5-wght600.woff2'
 
-# build.mjs 里写死的小标题
-fixed_labels = ['配置仓库', '包']
+# 各语言文案里的小标题：配置仓库、包、各分区名（文案是 JS 模块，借 Node 读出来）
+LABELS_SCRIPT = '''
+const { messages } = await import(process.argv[1]);
+const labels = [];
+for (const t of Object.values(messages)) labels.push(t.detail.setup, t.detail.packages, ...Object.values(t.sections));
+console.log(JSON.stringify(labels));
+'''
+fixed_labels = json.loads(
+	subprocess.run(
+		['node', '--input-type=module', '-e', LABELS_SCRIPT, (here / 'i18n.mjs').as_uri()],
+		check=True,
+		capture_output=True,
+		text=True,
+	).stdout
+)
 
 
 def titles(node):

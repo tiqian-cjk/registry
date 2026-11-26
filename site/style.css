@@ -14,8 +14,9 @@
 	/* 搜索框、代码框的底：半透明的纯白（暗色下另有一份），底下的颜色能透上来一点。手调改这里 */
 	--color-field-translucent: rgb(255 255 255 / 0.7);
 
+	/* 简中版 MiSans 没有的字（繁体字）由繁中版 MiSansTC 补上，同官网；繁中页面反过来，见下面的 :lang(zh-Hant) */
 	--font-sans:
-		'Inter Variable', MiSans, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
+		'Inter Variable', MiSans, MiSansTC, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
 		'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
 	--font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
@@ -41,9 +42,22 @@
 	/* 链接、按钮悬停和复制成功图标切换时的淡入淡出时长。手调改这里 */
 	--hover-fade: 150ms;
 
+	/* 正文最后一块到页脚第一行的距离（首页 .groups、详情页 .detail 的下内边距）。手调改这里 */
+	--content-footer-gap: 128px;
+
 	--footer-brand-column-width: 96px;
 	--footer-column-width: 124px;
 	--footer-column-gap: 16px;
+}
+
+/*
+ * 繁中页面的无衬线以繁中版 MiSansTC 为主（同官网）：MiSans 简中版的标点偏左下，繁中版居中，
+ * 而浏览器不会按 lang 替换简中版的标点，所以简中版只能排在繁中版后面，补繁中版没有的字；系统字体也退回繁中版。
+ */
+:lang(zh-Hant) {
+	--font-sans:
+		'Inter Variable', MiSansTC, MiSans, system-ui, -apple-system, 'PingFang TC', 'Noto Sans CJK TC',
+		'Microsoft JhengHei', sans-serif;
 }
 
 @media (min-width: 1224px) {
@@ -207,6 +221,14 @@ a {
 }
 
 .site-header {
+	/*
+	 * 页眉标志的几处尺寸（单位是 SVG 画布，高 116）：整张画布多宽；字（提 / T）左缘的 x；字底边的 y
+	 * （窄屏 BORING PLATFORM 放在字下面，按这两处对齐，见 max-width: 768px）。英文页面见下面的 :lang(en)
+	 */
+	--brand-logo-width: 560;
+	--brand-text-left: 113.68;
+	--brand-text-bottom: 97.895;
+
 	/* 页眉顶部边距。手调改这里（窄屏另有一份，见文件后面的 max-width: 768px） */
 	--header-padding-top: 16px;
 	/* logo 组右边到搜索框左边的最小距离（窄的时候搜索框缩到只留这么多）。手调改这里 */
@@ -256,6 +278,24 @@ a {
 	}
 }
 
+/*
+ * 繁中页面的标志是「提槧」（registry-mark-hant.svg，画布同简体 560 × 116，「提」的位置也一样），
+ * 只有「提」的底边略高一点：y = 97.44
+ */
+.site-header:lang(zh-Hant) {
+	--brand-text-bottom: 97.44;
+}
+
+/*
+ * 英文页面的标志是拼音「Tíqiàn」（registry-mark-en.svg，画布 597 × 116，Registry 跟在后面、间距同中文版）。
+ * T 的左缘 x = 114.42。窄屏的 BORING PLATFORM 和中文页面放在同一高度（按「提」的底边），
+ * 切换语言时页眉不跳；q 的下伸部分离它还有约 4px，不会碰上
+ */
+.site-header:lang(en) {
+	--brand-logo-width: 597;
+	--brand-text-left: 114.42;
+}
+
 .site-header__inner {
 	display: flex;
 	flex-wrap: wrap;
@@ -287,7 +327,7 @@ a {
 	display: block;
 	width: auto;
 	height: var(--header-logo-height);
-	aspect-ratio: 560 / 116;
+	aspect-ratio: var(--brand-logo-width) / 116;
 	/* SVG 左侧留白：标志的圆最左端在 x = 14.5425（画布高 116），往左挪掉，让笔画而非画布对齐边缘（同页脚标志） */
 	margin-inline-start: calc(-1 * var(--header-logo-height) * 14.5425 / 116);
 }
@@ -514,7 +554,7 @@ a {
 	display: grid;
 	/* 分组之间 */
 	gap: 32px;
-	padding-block: 64px 96px;
+	padding-block: 64px var(--content-footer-gap);
 }
 
 .group {
@@ -910,12 +950,12 @@ a {
 		--ink-svg-src: url('/assets/boring-platform.svg');
 		aspect-ratio: 270 / 36;
 		margin-top: calc(
-			var(--header-boring-gap) - var(--header-logo-height) * (116 - 97.895) / 116 -
+			var(--header-boring-gap) - var(--header-logo-height) * (116 - var(--brand-text-bottom)) / 116 -
 				var(--header-boring-height) * 8.88 / 36
 		);
 		/* 末尾的 1px：B 的竖笔比 提 的起笔看着更靠外，按笔画对齐后再往右挪一点，视觉上才齐。手调改这里 */
 		margin-inline-start: calc(
-			var(--header-logo-height) * (113.68 - 14.5425) / 116 -
+			var(--header-logo-height) * (var(--brand-text-left) - 14.5425) / 116 -
 				var(--header-boring-height) * 9.49 / 36 + 1px
 		);
 	}
@@ -1068,7 +1108,7 @@ a {
 
 	display: grid;
 	gap: 48px;
-	padding-block: 8px 96px;
+	padding-block: 8px var(--content-footer-gap);
 }
 
 /* 宽屏页脚第一栏是标志栏：包的左缘正好落在字标「提」的对齐线上 */
@@ -1324,7 +1364,7 @@ a {
 	margin: 0 0 0 8px;
 	/*
 	 * 标题和值都用 Medium（500）。站上的 MiSans 只有 Regular 和 Semibold，
-	 * 「版本、源码、协议」几个汉字用单独切的 MiSans Medium（site/misans-medium.py）；西文和等宽字是可变字体，直接 500
+	 * 「版本、源码、协议」（各语言）几个汉字用单独切的 MiSans Medium（site/misans-medium.py）；西文和等宽字是可变字体，直接 500
 	 */
 	font-family:
 		'Inter Variable', 'MiSans Medium', MiSans, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
@@ -1334,14 +1374,40 @@ a {
 	line-height: 1.6;
 }
 
+.detail__facts {
+	/* 两栏：标题一栏、值一栏，各行共用（每行是 subgrid），标题按最长的那个右对齐 */
+	grid-template-columns: auto auto;
+	column-gap: 8px;
+}
+
 .detail__facts div {
-	display: flex;
-	gap: 8px;
+	display: grid;
+	grid-column: 1 / -1;
+	grid-template-columns: subgrid;
+	/* 英文的标题字号小一号（见下），按基线对齐 */
+	align-items: baseline;
 	white-space: nowrap;
 }
 
 .detail__facts dt {
 	font-weight: 500;
+	text-align: right;
+}
+
+/*
+ * 英文的小标题全大写（文案里照常写 Setup、Packages，读屏不会一个字母一个字母念），和分组名（ENGINE……）一个样子。
+ * 大卡片右下角的 VERSION、SOURCE、LICENSE 紧挨着值，大写了显得重，字号小一号、字距放一点。手调改这里
+ */
+.detail__setup-title:lang(en),
+.detail__heading:lang(en),
+.search__heading:lang(en) {
+	text-transform: uppercase;
+}
+
+.detail__facts dt:lang(en) {
+	font-size: 12px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 .detail__facts dd {
@@ -1504,6 +1570,11 @@ a {
 	contain: inline-size;
 }
 
+/* 繁中页面同 --font-sans，繁中版在前（build.mjs 的 PROSE_FONTS 要一致） */
+.detail__prose:lang(zh-Hant) {
+	font-family: 'Inter Static', MiSansTC, MiSans;
+}
+
 .detail__setup-text {
 	margin: 0;
 	font-size: 14px;
@@ -1539,6 +1610,8 @@ a {
 .detail__heading {
 	/* 和右边第一张包卡片的顶边对齐，再往下移 --optical-outset（视觉补偿）；手机上标题在卡片上方，不补 */
 	margin: var(--optical-outset) 0 0;
+	/* 和右边的包卡片至少隔开卡片间距；放不下的长词（英文的 Integrations）在文案里的软连字符处折行 */
+	padding-inline-end: 16px;
 	font-family: 'Roboto Flex', 'Registry Label SC', var(--font-sans);
 	font-stretch: 80%;
 	font-size: 16px;
@@ -2028,7 +2101,10 @@ a {
 	--footer-item-gap: 8px;
 	--footer-logo-height: 24px;
 	/* 标志 SVG（288 × 115）左侧留白 x ≈ 14.958，用于让笔画而非画布对齐 */
-	--footer-logo-ink-offset: calc(var(--footer-logo-height) * 14.958 / 115);
+	--footer-logo-ink-offset: calc(var(--footer-logo-height) * var(--footer-logo-ink-left));
+	/* 标志 SVG 的宽高比（brand.svg 288 × 115；英文页面见下面的 :lang(en)） */
+	--footer-logo-ratio: 288 / 115;
+	--footer-logo-ink-left: 14.958 / 115;
 	--footer-navigation-gap: clamp(24px, calc(32px - 8 * (100vw - 375px) / 1065), 32px);
 
 	display: flex;
@@ -2037,9 +2113,28 @@ a {
 	margin-top: auto;
 }
 
+/* 繁中页面的页脚标志是「提槧」（brand-hant.svg，160 × 64），标志的圆最左端 x = 8.31 */
+.site-footer:lang(zh-Hant) {
+	--footer-logo-ratio: 160 / 64;
+	--footer-logo-ink-left: 8.31 / 64;
+}
+
+/* 英文页面的页脚标志是拼音「Tíqiàn」（brand-en.svg，320 × 116），标志的圆最左端 x = 14.5425 */
+.site-footer:lang(en) {
+	--footer-logo-ratio: 320 / 116;
+	--footer-logo-ink-left: 14.5425 / 116;
+}
+
 .site-footer__navigation {
+	/*
+	 * 右侧对齐线（语言一栏的右缘）：字标末尾 n 右竖笔的右缘，x ≈ 1612，即距右边 88（同官网）。
+	 * 导航作为尺寸容器，里面用 cqi 按导航宽度取值
+	 */
+	--footer-end-alignment-ratio: calc(88 / 1700);
+
 	width: var(--frame-width);
 	margin-bottom: var(--footer-navigation-gap);
+	container-type: inline-size;
 }
 
 .site-footer__columns {
@@ -2055,6 +2150,13 @@ a {
 	align-content: start;
 	gap: var(--footer-row-gap);
 	width: var(--footer-column-width);
+}
+
+/* 单独靠右的语言一栏：栏宽随内容，右缘落在右侧对齐线上（同官网） */
+.site-footer__column--end {
+	width: fit-content;
+	margin-inline-start: auto;
+	margin-inline-end: calc(100cqi * var(--footer-end-alignment-ratio));
 }
 
 @media (min-width: 1224px) {
@@ -2090,7 +2192,7 @@ a {
 .site-footer__brand .ink-svg {
 	width: auto;
 	height: var(--footer-logo-height);
-	aspect-ratio: 288 / 115;
+	aspect-ratio: var(--footer-logo-ratio);
 	margin-inline-start: calc(-1 * var(--footer-logo-ink-offset));
 }
 
@@ -2120,6 +2222,78 @@ a {
 
 .site-footer__group a:hover {
 	text-decoration-color: currentColor;
+}
+
+/*
+ * 放不下语言一栏时：列表上方靠右的下拉（footer.js），右缘同样落在右侧对齐线上（同官网）。
+ * 下拉是浏览器原生的 <select>：去掉自带的样子，地球和折角画在它两侧的内边距里，整块都能点，弹出的选项列表用系统的
+ */
+.site-footer__language-menu {
+	position: relative;
+	width: fit-content;
+	margin-block-end: var(--footer-row-gap);
+	margin-inline: auto calc(100% * var(--footer-end-alignment-ratio));
+	font-size: var(--footer-text-size);
+	line-height: var(--footer-line-height);
+}
+
+.site-footer__language-menu[hidden] {
+	display: none;
+}
+
+.site-footer__language-select {
+	appearance: none;
+	-webkit-appearance: none;
+	margin: 0;
+	/*
+	 * 左边放地球（画布 1.25em）再隔 0.25em。右边放折角：画布 1.25em、墨迹只占中间 0.5em，
+	 * 画布往右挪出 0.3125em（墨迹右缘落在对齐线上），文字到折角墨迹留 0.375em，
+	 * 和地球墨迹到文字的空隙一样（同官网），所以右内边距是 0.5em + 0.125em + 0.375em
+	 */
+	padding: 0 1em 0 1.5em;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	/* 宽度跟着当前语言的名字走（不按最长的选项） */
+	field-sizing: content;
+	cursor: pointer;
+}
+
+.site-footer__language-select:focus-visible {
+	outline: 2px solid color-mix(in srgb, var(--color-fg) 30%, transparent);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+/* 地球和折角都按字号缩放；1.25em 时笔画与正文最接近。不挡点击，点上去也是点下拉 */
+.site-footer__language-icon,
+.site-footer__language-chevron {
+	position: absolute;
+	top: 50%;
+	width: 1.25em;
+	aspect-ratio: 1;
+	translate: 0 -50%;
+	pointer-events: none;
+}
+
+.site-footer__language-icon {
+	left: 0;
+}
+
+/* 折角画布右边 0.3125em 是空白，往外挪掉，墨迹右缘落在对齐线上 */
+.site-footer__language-chevron {
+	right: -0.3125em;
+}
+
+/* 只给读屏看的文字 */
+.site-footer__visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 
 /* 字标在此裁掉下半截 */
