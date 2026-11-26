@@ -126,7 +126,7 @@ const ECOSYSTEMS = {
 		mirror: {
 			name: 'NPM',
 			href: 'https://www.npmjs.com/org/tiqian',
-			note: '在大多数情况下，包内容和更新速度与提椠 Registry 相同。'
+			note: '在绝大多数情况下，包内容和更新速度与提椠 Registry 相同。'
 		},
 		setup: () => ({ file: '.npmrc', code: `@tiqian:registry=${BASE}/npm/` }),
 		dependency: (name, version) => ({ code: `npm install ${name}@${version}` })

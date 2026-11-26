@@ -39,10 +39,9 @@
           "id": "web",
           "title": "Web",
           "sections": [
-            { "title": "组件", "packages": ["npm:@tiqian/web-component", "npm:@tiqian/react"] },
-            { "title": "框架集成", "packages": ["npm:@tiqian/astro", "npm:@tiqian/sveltekit"] },
-            { "title": "构建期", "packages": ["npm:@tiqian/precompute"] },
-            { "title": "底层", "packages": ["npm:@tiqian/core", "npm:@tiqian/ffi"] }
+            { "title": "集成", "packages": ["npm:@tiqian/web-component", "npm:@tiqian/react", "npm:@tiqian/astro", "npm:@tiqian/sveltekit"] },
+            { "title": "SSR", "packages": ["npm:@tiqian/precompute"] },
+            { "title": "底层", "packages": ["npm:@tiqian/core"] }
           ]
         },
         {
