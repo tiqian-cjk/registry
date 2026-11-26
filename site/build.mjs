@@ -96,6 +96,8 @@ const camelBreaks = (title) => escape(title).replace(/([a-z])(?=[A-Z])/g, '$1<wb
 // 卡片里的包：有分区的（平台卡片）按分区，没有的整张卡算一个不带标题的分区
 const sectionsOf = (card) => card.sections ?? [{ packages: card.packages }];
 const cardHref = (group, card) => `/${group.id}/${card.id}/`;
+// 详情页里每张包卡片的锚点（搜索结果点包名时直接滚到这张卡），比如 @tiqian/react → package-tiqian-react
+const packageAnchor = (name) => `package-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
 function lookup(packages, ref, where) {
 	if (!packages.has(ref)) fail(`catalog.json 里的 ${ref}（${where}）在元数据树里找不到`);
@@ -390,7 +392,7 @@ function renderPackage(level, pkg) {
 		return `https://github.com/${m.repository}/releases/tag/${m.tag}`;
 	};
 
-	const out = [`${indent(level)}<article class="package">`];
+	const out = [`${indent(level)}<article class="package" id="${packageAnchor(pkg.name)}">`];
 	out.push(`${indent(level + 1)}<header class="package__header">`);
 	const name = packageName(pkg.name);
 	// 版本：没有脚本时就是最新版本号，链到它的发布页；有脚本（versions.js）时换成下拉切换 + 发布页链接，
@@ -639,7 +641,7 @@ const page = (main, title, head = '') =>
 	template
 		.replace('<!-- main -->', main)
 		.replace('<!-- head -->', head)
-		.replace('<title>提椠 Registry</title>', `<title>${title ? `${escape(title)} · ` : ''}提椠 Registry</title>`);
+		.replace('<title>提椠 Registry</title>', `<title>${title ? `${escape(title)} — ` : ''}提椠 Registry</title>`);
 
 // 小标题里的汉字来自文渊黑体的子集，只有 site/subset-label-font.py 切进去的那些字
 const labelFontCss = fs.readFileSync(path.join(here, 'assets/fonts/registry-label-sc/registry-label-sc.css'), 'utf8');
@@ -662,10 +664,25 @@ const write = (file, html) => {
 };
 
 write(path.join(args.out, 'index.html'), page(renderGroups(catalog, packages)));
+
+// 搜索用的索引（search.js 第一次用到时取）：每张卡片一条（标题、分组），每个包一条（全名、在哪张卡片）
+const searchIndex = { cards: [], packages: [] };
+for (const group of catalog.groups) {
+	for (const card of group.cards) {
+		const href = cardHref(group, card);
+		searchIndex.cards.push({ title: card.title, group: group.title, href });
+		for (const section of sectionsOf(card)) {
+			for (const ref of section.packages) {
+				const { name } = lookup(packages, ref, `${group.id}/${card.id}`);
+				searchIndex.packages.push({ name, card: card.title, group: group.title, href: `${href}#${packageAnchor(name)}` });
+			}
+		}
+	}
+}
 let details = 0;
 for (const group of catalog.groups) {
 	for (const card of group.cards) {
-		const title = `${card.title}（${group.title}）`;
+		const title = `${group.title} / ${card.title}`;
 		const { main, head } = await renderDetail(group, card, packages);
 		write(path.join(args.out, group.id, card.id, 'index.html'), page(main, title, head));
 		details++;
@@ -679,7 +696,8 @@ for (const [file, bytes] of proseTables) fs.writeFileSync(path.join(args.out, TA
 
 const assets = path.join(args.out, 'assets');
 fs.mkdirSync(assets, { recursive: true });
-for (const file of ['style.css', 'footer.js', 'snippet.js', 'back.js', 'versions.js']) fs.copyFileSync(path.join(here, file), path.join(assets, file));
+fs.writeFileSync(path.join(assets, 'search-index.json'), JSON.stringify(searchIndex));
+for (const file of ['style.css', 'footer.js', 'snippet.js', 'back.js', 'versions.js', 'search.js']) fs.copyFileSync(path.join(here, file), path.join(assets, file));
 // 连同子目录一起复制（字体放在 assets/fonts/ 下）
 fs.cpSync(path.join(here, 'assets'), assets, { recursive: true });
 

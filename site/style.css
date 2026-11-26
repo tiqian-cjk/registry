@@ -375,6 +375,120 @@ a {
 	pointer-events: none;
 }
 
+/*
+ * 搜索结果的下拉（search.js）：搜索框下面隔 8px，和搜索框一样宽、一样的圆角。
+ * 没有脚本时聚焦就弹出，里面只有一句提示；有脚本时输了字才弹出
+ */
+.search__panel {
+	/* 下拉离搜索框多远、最高多高（再多就在里面滚）。手调改这里 */
+	--search-panel-gap: 8px;
+	--search-panel-max-height: min(60vh, 480px);
+	/* 下拉的内边距；里面每条的圆角按同心算（外圆角 12 − 内边距） */
+	--search-panel-pad: 4px;
+
+	position: absolute;
+	top: calc(100% + var(--search-panel-gap));
+	left: 0;
+	right: 0;
+	display: none;
+	flex-direction: column;
+	max-height: var(--search-panel-max-height);
+	/*
+	 * 下拉本身不滚，滚的是里面的列表（.search__results）：滚动条画在内边距里面，
+	 * 离下拉的边缘隔着 --search-panel-pad，不会被圆角切掉，也不会顶着圆角
+	 */
+	overflow: hidden;
+	padding: var(--search-panel-pad);
+	border-radius: 12px;
+	/* 搜索框同款半透明白，底下再垫一层页面底色和毛玻璃：下拉盖在正文上，要比搜索框更实一点 */
+	background:
+		linear-gradient(var(--color-field-translucent), var(--color-field-translucent)),
+		color-mix(in srgb, var(--color-bg) 70%, transparent);
+	-webkit-backdrop-filter: blur(48px);
+	backdrop-filter: blur(48px);
+	box-shadow: 0 8px 32px rgb(0 0 0 / 0.08);
+	font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+	.search__panel {
+		box-shadow: 0 8px 32px rgb(0 0 0 / 0.4);
+	}
+}
+
+.search:not(.search--ready):focus-within .search__panel,
+.search--ready.search--open:focus-within .search__panel {
+	display: flex;
+}
+
+.search--ready .search__hint {
+	display: none;
+}
+
+.search__results {
+	min-height: 0;
+	overflow-y: auto;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	/* 细一点的滚动条，颜色同正文的淡灰（Safari 不认这两条，照系统的来） */
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--color-fg) 20%, transparent) transparent;
+}
+
+.search__hint,
+.search__empty {
+	margin: 0;
+	padding: 8px 12px;
+	color: var(--color-muted);
+}
+
+.search__heading {
+	padding: 8px 12px 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color-muted);
+}
+
+.search__option {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 8px 12px;
+	border-radius: calc(12px - var(--search-panel-pad));
+	color: inherit;
+	text-decoration: none;
+}
+
+/* 鼠标移上去和键盘选中是同一个样子（search.js 里两者同步） */
+.search__option[aria-selected='true'] {
+	background: color-mix(in srgb, var(--color-fg) 6%, transparent);
+}
+
+.search__title {
+	min-width: 0;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+/* 包名同包卡片：等宽，前缀调淡 */
+.search__title--package {
+	font-family: var(--font-mono);
+	font-size: 13px;
+}
+
+.search__scope {
+	font-weight: 400;
+	color: var(--color-muted);
+}
+
+.search__meta {
+	flex: none;
+	font-size: 12px;
+	color: var(--color-muted);
+}
+
 /* ---------- 分组与卡片 ---------- */
 
 .groups {
@@ -863,6 +977,13 @@ a {
 		top: calc(var(--header-logo-height) / 2);
 		right: calc((var(--header-height) - var(--header-search-icon-size)) / 2 + 4px - var(--optical-outset));
 		transition: right var(--header-search-duration) var(--header-search-easing);
+	}
+
+	/* 下拉同样相对整个页眉定位：在输入框下面，和展开后的输入框一样宽（两边都往外多出 --optical-outset） */
+	.search__panel {
+		top: calc((var(--header-logo-height) + var(--header-height)) / 2 + var(--search-panel-gap));
+		left: calc(-1 * var(--optical-outset));
+		right: calc(-1 * var(--optical-outset));
 	}
 
 	/* 只够放按钮（没聚焦时）：输入框缩成 框高 × 框高 的方块靠右，放大镜居中，不显示文字 */
