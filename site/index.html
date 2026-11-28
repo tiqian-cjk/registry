@@ -1,0 +1,156 @@
+<!doctype html>
+<!--
+	各语言共用这一个模板（site/build.mjs 的 page）：双花括号里 t. 开头的是当前语言的文案（site/messages/），其余是 build.mjs 算好的
+-->
+<html lang="{{lang}}">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<title>{{title}}</title>
+		<meta name="description" content="{{description}}" />
+		<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+{{alternates}}
+{{social}}
+		<!--
+			字体都放在自己这里（assets/fonts/），不走外部 CDN：
+			与官网同款的 Inter（西文）、MiSans（汉字）；卡片用 JetBrains Mono；
+			分组标题用 Roboto Flex 的静态实例（wdth 80、wght 700，其余轴默认），
+			其中的汉字用文渊黑体 wdth 87.5、wght 600 的子集（Registry Label SC，由 site/subset-label-font.py 生成）。
+		-->
+		<link rel="stylesheet" href="/assets/fonts/inter/inter.css" />
+		<link rel="stylesheet" href="/assets/fonts/jetbrains-mono/jetbrains-mono.css" />
+		<link rel="stylesheet" href="/assets/fonts/misans/MiSans-Regular.min.css" />
+		<link rel="stylesheet" href="/assets/fonts/misans/MiSans-Semibold.min.css" />
+		<!-- 繁中版 MiSansTC：繁中页面以它为主，其他页面用它补简中版没有的字（同官网，见 style.css 的 --font-sans） -->
+		<link rel="stylesheet" href="/assets/fonts/misans-tc/MiSansTC-Regular.min.css" />
+		<link rel="stylesheet" href="/assets/fonts/misans-tc/MiSansTC-Semibold.min.css" />
+		<!-- 详情页大卡片右下角「版本、源码、协议」用的 MiSans Medium 子集（site/misans-medium.py） -->
+		<link rel="stylesheet" href="/assets/fonts/misans-medium/misans-medium.css" />
+		<link rel="stylesheet" href="/assets/fonts/roboto-flex/roboto-flex.css" />
+		<link rel="stylesheet" href="/assets/fonts/registry-label-sc/registry-label-sc.css" />
+		<!-- 提椠排的说明文字用的 Inter 静态实例（构建期预排不支持可变字体，见 site/static-inter.py） -->
+		<link rel="stylesheet" href="/assets/fonts/inter-static/inter-static.css" />
+		<link rel="stylesheet" href="/assets/style.css" />
+		<!-- 详情页：提椠构建期预排的数据，由 site/build.mjs 填入 -->
+<!-- head -->
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="site-header__inner frame">
+				<div class="header-brand">
+					<a class="brand" href="{{home}}" aria-label="{{t.siteName}}">
+						<!-- 标志和「提椠」实色；「Registry」两层混合（见 style.css 的 .ink-blend） -->
+						<span class="brand__logo" aria-hidden="true">
+							{{brandMark}}
+							<span class="ink-blend brand__word" style="--ink-svg-src: url('{{brandWord}}')"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
+						</span>
+					</a>
+					<a class="powered-link" href="https://github.com/Losses/boring" aria-label="Powered by Boring Platform">
+						<span class="ink-blend powered" style="--powered-wide: url('{{poweredWide}}'); --powered-narrow: url('{{poweredNarrow}}')" aria-hidden="true"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
+					</a>
+				</div>
+				<!-- data-*：search.js 用的地址前缀（当前语言）和几句提示 -->
+				<form
+					class="search"
+					role="search"
+					onsubmit="return false"
+					data-base="{{searchBase}}"
+					data-packages="{{t.search.packages}}"
+					data-empty="{{t.search.empty}}"
+					data-failed="{{t.search.failed}}"
+				>
+					<input type="search" aria-label="{{t.search.label}}" autocomplete="off" />
+					<!-- Material Symbols「search」：Outlined，字重 400、grade 0、opsz 24，不填充（Apache-2.0） -->
+					<svg viewBox="0 -960 960 960" aria-hidden="true">
+						<path fill="currentColor" d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+					</svg>
+					<!--
+						搜索结果：搜索框下面弹出来的一块，聚焦时显示（见 style.css 的 .search__panel）。
+						没有脚本时只有下面这句提示；有脚本时 search.js 把提示换成结果列表
+					-->
+					<div class="search__panel">
+						<p class="search__hint">{{t.search.noScript}}</p>
+						<ul class="search__results" id="search-results" role="listbox" aria-label="{{t.search.results}}" hidden></ul>
+					</div>
+				</form>
+			</div>
+		</header>
+
+		<!-- 主体：首页是分组卡片，详情页是单张卡片的包列表，由 site/build.mjs 填入 -->
+<!-- main -->
+
+		<footer class="site-footer">
+			<nav class="site-footer__navigation" aria-label="{{t.footer.navigationLabel}}">
+				<!--
+					语言：放得下时单独成一栏靠右（下面最后一组），放不下时 footer.js 把它收成这个下拉（同官网）。
+					下拉用浏览器原生的 <select>，选了就跳到那种语言的同一页（footer.js）。没有脚本时一直是单独一栏
+				-->
+				<div class="site-footer__language-menu" hidden>
+					<span class="ink-svg site-footer__language-icon" style="--ink-svg-src: url('/assets/language.svg')" aria-hidden="true"></span>
+					<select class="site-footer__language-select" aria-label="{{t.footer.language.title}}">
+{{languageOptions}}
+					</select>
+					<span class="ink-svg site-footer__language-chevron" style="--ink-svg-src: url('/assets/expand-more-20.svg')" aria-hidden="true"></span>
+				</div>
+				<div class="site-footer__columns">
+					<div class="site-footer__column">
+						<div class="site-footer__brand" data-footer-item="0">
+							<a href="{{tiqianHome}}" aria-label="{{t.tiqianHomeLabel}}">
+								<span class="site-footer__logo" aria-hidden="true">
+									{{brandLogoMark}}
+								</span>
+							</a>
+						</div>
+					</div>
+					<div class="site-footer__column">
+						<section class="site-footer__group" data-footer-item="1">
+							<h2>{{t.footer.repositories.title}}</h2>
+							<ul>
+								<li><a href="https://github.com/tiqian-cjk/tiqian">{{t.footer.repositories.tiqian}}</a></li>
+								<li><a href="https://github.com/tiqian-cjk/tiqian-rs">{{t.footer.repositories.tiqianRust}}</a></li>
+								<li><a href="https://github.com/tiqian-cjk/tiqian-markdown">{{t.footer.repositories.tiqianMarkdown}}</a></li>
+								<li><a href="https://github.com/tiqian-cjk/tiqian-math">{{t.footer.repositories.tiqianMath}}</a></li>
+								<li><a href="https://github.com/tiqian-cjk/pageflow">Pageflow</a></li>
+							</ul>
+						</section>
+					</div>
+					<div class="site-footer__column">
+						<section class="site-footer__group" data-footer-item="2">
+							<h2>{{t.footer.packages.title}}</h2>
+							<ul>
+								<li><a href="{{home}}">{{t.footer.packages.registry}}</a></li>
+								<li><a href="https://mvnrepository.com/artifact/org.tiqian">Maven Central</a></li>
+								<li><a href="https://www.npmjs.com/org/tiqian">NPM</a></li>
+								<li><a href="https://crates.io/crates/tiqian">Cargo</a></li>
+							</ul>
+						</section>
+					</div>
+					<div class="site-footer__column site-footer__column--end">
+						<section class="site-footer__group site-footer__group--language" data-footer-item="3">
+							<h2>{{t.footer.language.title}}</h2>
+							<ul>
+{{languageItems}}
+							</ul>
+						</section>
+					</div>
+				</div>
+			</nav>
+
+			<div class="site-footer__wordmark-frame">
+				<!-- 纯装饰：品牌名已由页眉与页脚标志提供，读屏跳过 -->
+				<span class="ink-svg" style="--ink-svg-src: url('/assets/wordmark-serif.svg')" aria-hidden="true"></span>
+			</div>
+		</footer>
+
+		<script src="/assets/footer.js"></script>
+		<script src="/assets/snippet.js"></script>
+		<script src="/assets/back.js"></script>
+		<script src="/assets/versions.js"></script>
+		<script src="/assets/search.js"></script>
+		<script src="/assets/logo.js"></script>
+		<!-- 提椠排版（构建时打包到 /assets/tiqian/，见 site/vite.config.mjs）：页面上有 <tiqian-prose> 才加载 -->
+		<script type="module">
+			if (document.querySelector('tiqian-prose')) import('/assets/tiqian/tiqian.js').catch(() => {});
+		</script>
+	</body>
+</html>

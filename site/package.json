@@ -1,0 +1,13 @@
+{
+	"name": "registry-site",
+	"private": true,
+	"type": "module",
+	"description": "registry.tiqian.org 的页面构建依赖：提椠的网页组件（打包进 assets/tiqian/，见 vite.config.mjs）、构建期预排（见 build.mjs）、把分享预览图转成 PNG 的 resvg（见 og.mjs）",
+	"devDependencies": {
+		"@resvg/resvg-js": "2.6.2",
+		"@tiqian/precompute": "0.1.0-alpha.15",
+		"@tiqian/web-component": "0.1.0-alpha.15",
+		"shiki": "4.6.0",
+		"vite": "6.4.6"
+	}
+}

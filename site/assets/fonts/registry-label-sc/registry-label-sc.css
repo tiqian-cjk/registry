@@ -1,0 +1,11 @@
+/* 文渊黑体（WenYuan Sans SC）宽度 87.5、SemiBold 的子集，只含小标题用到的汉字：仓件儲元包合套存定层層库底庫成整组置設配集 */
+/* 由 site/subset-label-font.py 生成，别手改。SIL OFL 1.1，保留字体名不能用于修改版，所以改名 */
+@font-face {
+  font-family: 'Registry Label SC';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 87.5%;
+  font-display: swap;
+  src: url(./registry-label-sc-wdth87.5-wght600.woff2) format('woff2');
+  unicode-range: U+4ED3, U+4EF6, U+5132, U+5143, U+5305, U+5408, U+5957, U+5B58, U+5B9A, U+5C42, U+5C64, U+5E93, U+5E95, U+5EAB, U+6210, U+6574, U+7EC4, U+7F6E, U+8A2D, U+914D, U+96C6;
+}
