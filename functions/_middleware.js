@@ -6,6 +6,9 @@
  *      其他中文 → 简体（根路径），英文和其他语言 → /en/；
  *   3. 都没有（比如搜索引擎的爬虫一般不带 Accept-Language）就不跳，原样返回。
  *
+ * 爬虫和链接预览机器人一律不跳：Telegram 的预览爬虫带着 Accept-Language: en，
+ * 不排除的话，别人分享简体页面，预览出来的却是英文版。按 User-Agent 认（见 BOT_PATTERN）。
+ *
  * 只管站点的页面（GET、返回 HTML 的那些）：npm、Maven、Cargo 这些仓库接口返回的不是 HTML，原样放过。
  * 语言和路径的规则同 site/i18n.mjs：简体在根路径，其余加一级前缀。改那边时这里要一起改。
  */
@@ -13,6 +16,11 @@
 const LOCALES = ['zh-Hans', 'zh-Hant', 'en'];
 const DEFAULT_LOCALE = 'zh-Hans';
 const COOKIE = 'tiqian-registry-lang';
+
+// 常见的爬虫和链接预览机器人（Telegram、X、Facebook、Slack、Discord、WhatsApp、LinkedIn、各家搜索引擎……），
+// 加上名字里带 bot、crawler、spider、preview 的
+const BOT_PATTERN =
+	/bot\b|bot\/|crawler|spider|preview|facebookexternalhit|whatsapp|slack|discord|telegram|twitter|linkedin|embedly|vkshare|skype|line\//i;
 
 // 路径属于哪种语言，去掉语言前缀后的路径是什么（/zh-Hant/platform/web/ → zh-Hant、/platform/web/）
 function splitLocale(pathname) {
@@ -67,6 +75,7 @@ function localeFromCookie(header) {
 export async function onRequest(context) {
 	const { request, next } = context;
 	if (request.method !== 'GET') return next();
+	if (BOT_PATTERN.test(request.headers.get('user-agent') ?? '')) return next();
 
 	const response = await next();
 	if (!(response.headers.get('content-type') ?? '').includes('text/html')) return response;
