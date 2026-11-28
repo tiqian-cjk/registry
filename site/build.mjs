@@ -687,6 +687,47 @@ for (const slot of ['<!-- main -->', '<!-- head -->']) {
 
 // 页面：模板里的 {{t.xxx}} 换成当前语言的文案（转义），{{名字}} 换成下面算好的 HTML（原样）。
 // pagePath 是不带语言前缀的路径（/ 或 /<组>/<卡片>/），用来算各语言版本的地址
+// ---------- 会动的标志 ----------
+
+// 标志的点头眨眼动画（site/logo-nod-wink.svg，24 × 24 的画布，SMIL）。原图一轮 2.8 秒，这里统一改成 LOGO_DURATION。拆出标志那组图形，去掉背景色块，
+// 颜色改成 currentColor（跟着亮暗色变），所有动画改成 begin="indefinite"、只播一轮：不自己播，悬停时由 site/logo.js 开始
+// 动画一轮多少秒（logo.js 从 .logo-mark 的 data-duration 读）。手调改这里
+const LOGO_DURATION = 2;
+const LOGO_ANIMATION = (() => {
+	const source = fs.readFileSync(path.join(here, 'logo-nod-wink.svg'), 'utf8');
+	const start = source.indexOf('<g fill=');
+	const end = source.lastIndexOf('</g>');
+	if (start < 0 || end < start) fail('site/logo-nod-wink.svg 里找不到标志那组图形');
+	return source
+		.slice(start, end + 4)
+		.replace(/<g fill="[^"]*"/, '<g fill="currentColor"')
+		.replace(/<(animate|animateTransform) /g, '<$1 begin="indefinite" ')
+		// 每次悬停只播一轮
+		.replace(/repeatCount="indefinite"/g, 'repeatCount="1"')
+		.replace(/dur="[^"]*"/g, `dur="${LOGO_DURATION}s"`)
+		.replace(/\s*\n\s*/g, ' ');
+})();
+
+// 动画里标志的圆（左眼）在 24 × 24 画布上的外框：x 4.16–11.26、y 5.22–12.32。
+// 每张字标里，同一个圆的外框是多少，就按比例把动画放大、挪过去，正好盖在原来标志的位置上
+const LOGO_CIRCLE = { x: 4.16, y: 5.22, size: 7.1 };
+const placement = (width, height, x, y, size) => ({ width, height, scale: size / LOGO_CIRCLE.size, x: x - LOGO_CIRCLE.x * (size / LOGO_CIRCLE.size), y: y - LOGO_CIRCLE.y * (size / LOGO_CIRCLE.size) });
+const LOGO_MARK_PLACEMENTS = {
+	// 页眉：registry-text*.svg 的画布（简繁 560 × 116，英文 597 × 116），圆在 x 14.54、y 19.21，宽 35.61
+	header: {
+		default: placement(560, 116, 14.54, 19.21, 35.61),
+		en: placement(597, 116, 14.54, 19.21, 35.61)
+	},
+	// 页脚：brand-text.svg 288 × 115、brand-text-en.svg 320 × 116、brand-text-hant.svg 160 × 64
+	footer: {
+		default: placement(288, 115, 14.96, 19.73, 36.63),
+		en: placement(320, 116, 14.54, 19.21, 35.61),
+		'zh-Hant': placement(160, 64, 8.31, 10.98, 20.35)
+	}
+};
+const logoMark = ({ width, height, scale, x, y }) =>
+	`<svg class="logo-mark" data-duration="${LOGO_DURATION}" viewBox="0 0 ${width} ${height}" aria-hidden="true"><g transform="translate(${x.toFixed(3)} ${y.toFixed(3)}) scale(${scale.toFixed(4)})">${LOGO_ANIMATION}</g></svg>`;
+
 // 分享预览（Open Graph）里的语言写法
 const OG_LOCALES = { 'zh-Hans': 'zh_CN', 'zh-Hant': 'zh_TW', en: 'en_US' };
 
@@ -709,9 +750,12 @@ function page(main, pagePath, title, head = '', description = t.meta.description
 		tiqianHome: locale === defaultLocale ? 'https://tiqian.org/' : `https://tiqian.org/${locale}`,
 		searchBase: locale === defaultLocale ? '' : `/${locale}`,
 		// 标志按语言换：英文是拼音「Tíqiàn」，繁中是「提槧」（尺寸差异见 style.css 的 .site-header:lang(…) 和 .site-footer:lang(…)）
-		brandMark: { en: '/assets/registry-mark-en.svg', 'zh-Hant': '/assets/registry-mark-hant.svg' }[locale] ?? '/assets/registry-mark.svg',
+		// 页眉、页脚的标志都拆成两层：字（下面这几张 SVG，不含标志）和标志（logoMark 生成的内联 SVG，悬停时点头眨眼，见 site/logo.js）
+		brandText: { en: '/assets/registry-text-en.svg', 'zh-Hant': '/assets/registry-text-hant.svg' }[locale] ?? '/assets/registry-text.svg',
+		brandMark: logoMark(LOGO_MARK_PLACEMENTS.header[locale] ?? LOGO_MARK_PLACEMENTS.header.default),
 		brandWord: locale === 'en' ? '/assets/registry-word-en.svg' : '/assets/registry-word.svg',
-		brandLogo: { en: '/assets/brand-en.svg', 'zh-Hant': '/assets/brand-hant.svg' }[locale] ?? '/assets/brand.svg',
+		brandLogoText: { en: '/assets/brand-text-en.svg', 'zh-Hant': '/assets/brand-text-hant.svg' }[locale] ?? '/assets/brand-text.svg',
+		brandLogoMark: logoMark(LOGO_MARK_PLACEMENTS.footer[locale] ?? LOGO_MARK_PLACEMENTS.footer.default),
 		// 搜索引擎用：同一页的各语言版本
 		alternates: locales
 			.map((target) => `\t\t<link rel="alternate" hreflang="${target}" href="${BASE}${hrefs[target]}" />`)
@@ -817,7 +861,7 @@ for (const [file, bytes] of proseTables) fs.writeFileSync(path.join(args.out, TA
 const assets = path.join(args.out, 'assets');
 fs.mkdirSync(assets, { recursive: true });
 fs.writeFileSync(path.join(assets, 'search-index.json'), JSON.stringify(searchIndex));
-for (const file of ['style.css', 'footer.js', 'snippet.js', 'back.js', 'versions.js', 'search.js']) fs.copyFileSync(path.join(here, file), path.join(assets, file));
+for (const file of ['style.css', 'footer.js', 'snippet.js', 'back.js', 'versions.js', 'search.js', 'logo.js']) fs.copyFileSync(path.join(here, file), path.join(assets, file));
 // 连同子目录一起复制（字体放在 assets/fonts/ 下）
 fs.cpSync(path.join(here, 'assets'), assets, { recursive: true });
 

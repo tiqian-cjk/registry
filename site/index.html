@@ -41,7 +41,8 @@
 					<a class="brand" href="{{home}}" aria-label="{{t.siteName}}">
 						<!-- 标志和「提椠」实色；「Registry」两层混合（见 style.css 的 .ink-blend） -->
 						<span class="brand__logo" aria-hidden="true">
-							<span class="ink-svg" style="--ink-svg-src: url('{{brandMark}}')"></span>
+							<span class="ink-svg" style="--ink-svg-src: url('{{brandText}}')"></span>
+							{{brandMark}}
 							<span class="ink-blend brand__word" style="--ink-svg-src: url('{{brandWord}}')"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
 						</span>
 					</a>
@@ -96,7 +97,10 @@
 					<div class="site-footer__column">
 						<div class="site-footer__brand" data-footer-item="0">
 							<a href="{{tiqianHome}}" aria-label="{{t.tiqianHomeLabel}}">
-								<span class="ink-svg" style="--ink-svg-src: url('{{brandLogo}}')" aria-hidden="true"></span>
+								<span class="site-footer__logo" aria-hidden="true">
+									<span class="ink-svg" style="--ink-svg-src: url('{{brandLogoText}}')"></span>
+									{{brandLogoMark}}
+								</span>
 							</a>
 						</div>
 					</div>
@@ -145,6 +149,7 @@
 		<script src="/assets/back.js"></script>
 		<script src="/assets/versions.js"></script>
 		<script src="/assets/search.js"></script>
+		<script src="/assets/logo.js"></script>
 		<!-- 提椠排版（构建时打包到 /assets/tiqian/，见 site/vite.config.mjs）：页面上有 <tiqian-prose> 才加载 -->
 		<script type="module">
 			if (document.querySelector('tiqian-prose')) import('/assets/tiqian/tiqian.js').catch(() => {});
