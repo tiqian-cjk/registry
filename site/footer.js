@@ -129,8 +129,22 @@ function layout() {
 layout();
 new ResizeObserver(layout).observe(container);
 
-/* 原生下拉：选了哪种语言就跳到它的同一页（option 的 value） */
+/*
+ * 选过的语言记在 cookie 里（一年）：服务器端按它跳到这种语言的页面，不再按浏览器语言跳
+ * （见 functions/_middleware.js，cookie 名两边要一致）
+ */
+const rememberLanguage = (locale) => {
+	document.cookie = `tiqian-registry-lang=${locale}; path=/; max-age=31536000; samesite=lax`;
+};
+
+/* 原生下拉：选了哪种语言就记下来，跳到它的同一页（option 的 value） */
 const languageSelect = languageMenu.querySelector('.site-footer__language-select');
 languageSelect.addEventListener('change', () => {
+	rememberLanguage(languageSelect.selectedOptions[0].lang);
 	location.href = languageSelect.value;
 });
+
+/* 语言单独一栏时是链接：点了同样记下来，再照常跳转 */
+for (const link of document.querySelectorAll('.site-footer__group--language a[hreflang]')) {
+	link.addEventListener('click', () => rememberLanguage(link.hreflang));
+}

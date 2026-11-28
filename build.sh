@@ -9,7 +9,7 @@ TREE_DIR="$PWD/.tree"
 rm -rf "$TREE_DIR"
 mkdir -p "$TREE_DIR"
 for d in */; do
-  case "$d" in .git/|.tool-bin/|.tree/|dist/|site/) continue ;; esac
+  case "$d" in .git/|.tool-bin/|.tree/|dist/|site/|functions/) continue ;; esac
   cp -r "$d" "$TREE_DIR/"
 done
 
