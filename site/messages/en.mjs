@@ -2,8 +2,7 @@
 export default {
 	meta: {
 		description: 'The package registry for Tíqiàn.',
-		detailDescription: 'Tíqiàn packages for {card} ({group}): {packages}. Latest version {version}.',
-		listSeparator: ', '
+		detailDescription: 'Use {product} in {card}.'
 	},
 	siteName: 'Tíqiàn Registry',
 	tiqianHomeLabel: 'Tíqiàn home',

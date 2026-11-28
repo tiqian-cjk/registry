@@ -2,8 +2,7 @@
 export default {
 	meta: {
 		description: '提槧的套件儲存庫。',
-		detailDescription: '{card}（{group}）的提槧套件：{packages}。最新版本 {version}。',
-		listSeparator: '、'
+		detailDescription: '在 {card} 中使用{product}。'
 	},
 	siteName: '提槧 Registry',
 	tiqianHomeLabel: '提槧首頁',

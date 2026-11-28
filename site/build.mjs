@@ -666,13 +666,9 @@ async function renderDetail(group, card, packages) {
 	});
 
 	out.push(`${indent(2)}</main>`);
-	// 页面描述（<meta name="description"> 和分享预览）：这张卡里有哪些包、最新版本
-	const description = format(t.meta.detailDescription, {
-		card: card.title,
-		group: group.title,
-		packages: all.map((p) => p.name).join(t.meta.listSeparator),
-		version
-	});
+	// 页面描述（<meta name="description"> 和分享预览）。产品名按组：MARKDOWN、MATH 是提椠 Markdown、提椠 Math，其余是提椠
+	const product = { markdown: t.footer.repositories.tiqianMarkdown, math: t.footer.repositories.tiqianMath }[group.id] ?? t.footer.repositories.tiqian;
+	const description = format(t.meta.detailDescription, { card: card.title, product });
 	return { main: out.join('\n'), head: head.filter(Boolean).join('\n'), description };
 }
 
