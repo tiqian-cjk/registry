@@ -103,8 +103,10 @@ function footerRow(assets, logo) {
 
 // ---------- 详情页 ----------
 
-// 大卡片照详情页的 .detail__hero 按 HERO_SCALE 倍放大：内边距、字号、色块的轨道和模糊都乘这个数。手调改这里
+// 大卡片照详情页的 .detail__hero 按 HERO_SCALE 倍放大：内边距、圆角、色块的轨道和模糊都乘这个数；
+// 卡片里的字（字号和字之间的间距）单独按 HERO_TEXT_SCALE 放大，缩略图里看得清。手调改这里
 const HERO_SCALE = 2.2;
+const HERO_TEXT_SCALE = 2.7;
 // 大卡片在画面上：左边、上边超出画面（只露右下角的圆角），右边对齐 RIGHT，底边在 HERO_BOTTOM
 const HERO_BOTTOM = 428;
 const RIGHT = 1196;
@@ -123,6 +125,7 @@ const baselineIn = (boxBottom, size, lineHeight) => boxBottom - (size * lineHeig
 // labelStyle：右下小标题的字（中文用 MiSans，英文用 Inter 全大写）
 export function detailImageSvg({ card, facts, labelStyle, assets, logo, fontFiles, arrowPath }) {
 	const S = HERO_SCALE;
+	const T = HERO_TEXT_SCALE;
 	const out = [
 		`<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}">`,
 		`<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="#f3f2f0"/>`
@@ -163,23 +166,25 @@ export function detailImageSvg({ card, facts, labelStyle, assets, logo, fontFile
 	// 左下：组名和大标题。大标题（.detail__title：40px、400、字距 -0.05em、行高 1.1）贴着下内边距（12）、左内边距（16）；
 	// 组名（.detail__group：Roboto Flex 窄体粗体 16px、行高 1.2，灰）在它上面，隔 2px
 	const pad = { x: 16 * S, bottom: 12 * S };
-	const titleSize = 40 * S;
+	const titleSize = 40 * T;
 	const titleBox = HERO_BOTTOM - pad.bottom;
-	const groupSize = 16 * S;
-	const groupBox = titleBox - titleSize * 1.1 - 2 * S;
+	const groupSize = 16 * T;
+	const groupBox = titleBox - titleSize * 1.1 - 2 * T;
 	out.push(
 		blend(`<text x="${pad.x.toFixed(1)}" y="${baselineIn(groupBox, groupSize, 1.2).toFixed(1)}" font-family="Roboto Flex" font-size="${groupSize.toFixed(1)}">${escape(card.group)}</text>`),
 		`<text x="${pad.x.toFixed(1)}" y="${baselineIn(titleBox, titleSize, 1.1).toFixed(1)}" font-family="JetBrains Mono" font-size="${titleSize.toFixed(1)}" letter-spacing="${(-0.05 * titleSize).toFixed(2)}" fill="#1c1c1c">${escape(card.title)}</text>`
 	);
 
-	// 右下：版本、源码、协议（.detail__facts：13px、500、行高 1.6、行距 2px，标题一栏右对齐、和值隔 8px）
-	const factSize = 13 * S;
-	const rowHeight = factSize * 1.6;
-	const rowGap = 2 * S;
-	const columnGap = 8 * S;
-	const iconSize = 14 * S;
+	// 右下：版本、源码、协议（按 facts 的顺序；字照 .detail__facts：13px、500、行距 2px，标题一栏右对齐、和值隔 8px，
+	// 行高比页面上的 1.6 收紧）。最后一行贴着下内边距，最后一个字离卡片右边是左右内边距。手调改这里
+	const factSize = 13 * T;
+	const factLineHeight = 1.3;
+	const rowHeight = factSize * factLineHeight;
+	const rowGap = 2 * T;
+	const columnGap = 8 * T;
+	const iconSize = 14 * T;
 	// 「GitHub」和 ↗ 之间的空隙（页面上图标前面有一个很窄的空）
-	const iconGap = 2 * S;
+	const iconGap = 2 * T;
 	const valueStyle = (kind) =>
 		kind === 'version'
 			? { family: 'JetBrains Mono', weight: 600, size: factSize }
@@ -189,7 +194,7 @@ export function detailImageSvg({ card, facts, labelStyle, assets, logo, fontFile
 	const labelRight = valueLeft - columnGap;
 	facts.forEach(({ label, value, kind }, i) => {
 		const boxBottom = HERO_BOTTOM - pad.bottom - (facts.length - 1 - i) * (rowHeight + rowGap);
-		const y = baselineIn(boxBottom, factSize, 1.6).toFixed(1);
+		const y = baselineIn(boxBottom, factSize, factLineHeight).toFixed(1);
 		const style = valueStyle(kind);
 		out.push(
 			`<text x="${labelRight.toFixed(1)}" y="${y}" text-anchor="end" font-family="${labelStyle.family}" font-weight="${labelStyle.weight}" font-size="${labelStyle.size.toFixed(1)}" letter-spacing="${(labelStyle.tracking ?? 0).toFixed(2)}" fill="#1c1c1c">${escape(label)}</text>`,

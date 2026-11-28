@@ -906,17 +906,18 @@ const ogImagePath = (target, pagePath = '/') => {
 	for (const target of locales) {
 		const tt = messages[target];
 		writePng(ogImagePath(target), homeImageSvg({ cards, assets, fontFamily: 'JetBrains Mono', logo: logos[target] }));
-		// 详情页右下的小标题：中文用 MiSans Medium 13px，英文同页面上那样全大写、12px、字距 0.04em（都再乘大卡片的放大倍数）
+		// 详情页右下的小标题：中文用 MiSans Medium 13px，英文同页面上那样全大写、12px、字距 0.04em（都再乘 og.mjs 里字的放大倍数 HERO_TEXT_SCALE）
 		const labelStyle =
 			target === 'en'
-				? { family: 'Inter', weight: 500, size: 12 * 2.2, tracking: 12 * 2.2 * 0.04, upper: true }
-				: { family: 'MiSans VF', weight: 500, size: 13 * 2.2 };
+				? { family: 'Inter', weight: 500, size: 12 * 2.7, tracking: 12 * 2.7 * 0.04, upper: true }
+				: { family: 'MiSans VF', weight: 500, size: 13 * 2.7 };
 		const label = (text) => (labelStyle.upper ? text.toUpperCase() : text);
 		for (const group of catalog.groups) {
 			for (const card of group.cards) {
 				const all = sectionsOf(card).flatMap((s) => s.packages).map((ref) => lookup(packages, ref, `${group.id}/${card.id}`));
 				const metas = all.map((p) => p.versions.get(latest([...p.versions.keys()])));
 				const licenses = [...new Set(metas.map((m) => m.license).filter(Boolean))];
+				// 顺序同页面：版本、源码、协议
 				const facts = [
 					{ label: label(tt.detail.version), value: latest(metas.map((m) => m.version)), kind: 'version' },
 					{ label: label(tt.detail.source), value: 'GitHub', kind: 'link' },
