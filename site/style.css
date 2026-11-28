@@ -203,14 +203,8 @@ a {
 	}
 }
 
-.brand__logo > .ink-svg {
-	position: absolute;
-	inset: 0;
-	height: 100%;
-}
-
 /*
- * 会动的标志：内联 SVG，和字那张图同一块画布、叠在同一个位置（build.mjs 的 logoMark 算好了缩放和位移）。
+ * 标志和字：一张内联 SVG（build.mjs 的 logoArt），会动的标志按算好的缩放和位移叠在字的画布上。
  * 颜色跟着文字色走；点头时会稍微越出画布，不裁
  */
 .logo-mark {
@@ -341,7 +335,7 @@ a {
 
 /* 标志 + 提椠 + Registry 是一整张 SVG；Registry 的灰来自 SVG 里的 60% 不透明度 */
 .brand__logo {
-	/* 三层叠在一起：「提椠」（registry-text.svg）、会动的标志（.logo-mark）、「Registry」（registry-word.svg，两层混合）。registry-mark*.svg 是带标志的原图，字那几张由它去掉标志而来 */
+	/* 两层叠在一起：「提椠」和会动的标志合成的内联 SVG（.logo-mark，字取自 registry-text*.svg）、「Registry」（registry-word*.svg，两层混合，data URI）。registry-mark*.svg 是带标志的原图，字那几张由它去掉标志而来 */
 	position: relative;
 	display: block;
 	width: auto;
@@ -362,7 +356,8 @@ a {
  */
 /* 用哪张图写在这里而不是 HTML 里，窄屏好换成单行的那张（见文件后面的 max-width: 768px） */
 .powered {
-	--ink-svg-src: url('/assets/powered-by-boring-platform.svg');
+	/* 两张图都由 build.mjs 写成 data URI 放在元素的 style 上（--powered-wide、--powered-narrow），不另外加载 */
+	--ink-svg-src: var(--powered-wide);
 	width: auto;
 	height: var(--header-boring-height);
 	aspect-ratio: 280 / 56;
@@ -966,7 +961,7 @@ a {
 	}
 
 	.powered {
-		--ink-svg-src: url('/assets/boring-platform.svg');
+		--ink-svg-src: var(--powered-narrow);
 		aspect-ratio: 270 / 36;
 		margin-top: calc(
 			var(--header-boring-gap) - var(--header-logo-height) * (116 - var(--brand-text-bottom)) / 116 -
@@ -2217,7 +2212,7 @@ a {
 }
 
 .site-footer__logo {
-	/* 两层叠在一起：字（brand-text*.svg）和会动的标志（.logo-mark） */
+	/* 字和会动的标志是同一张内联 SVG（.logo-mark，见 build.mjs 的 logoArt） */
 	position: relative;
 	display: block;
 	width: auto;
@@ -2226,11 +2221,6 @@ a {
 	margin-inline-start: calc(-1 * var(--footer-logo-ink-offset));
 }
 
-.site-footer__logo > .ink-svg {
-	position: absolute;
-	inset: 0;
-	height: 100%;
-}
 
 .site-footer__group ul {
 	display: grid;

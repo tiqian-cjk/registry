@@ -41,13 +41,12 @@
 					<a class="brand" href="{{home}}" aria-label="{{t.siteName}}">
 						<!-- 标志和「提椠」实色；「Registry」两层混合（见 style.css 的 .ink-blend） -->
 						<span class="brand__logo" aria-hidden="true">
-							<span class="ink-svg" style="--ink-svg-src: url('{{brandText}}')"></span>
 							{{brandMark}}
 							<span class="ink-blend brand__word" style="--ink-svg-src: url('{{brandWord}}')"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
 						</span>
 					</a>
 					<a class="powered-link" href="https://github.com/Losses/boring" aria-label="Powered by Boring Platform">
-						<span class="ink-blend powered" aria-hidden="true"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
+						<span class="ink-blend powered" style="--powered-wide: url('{{poweredWide}}'); --powered-narrow: url('{{poweredNarrow}}')" aria-hidden="true"><span class="ink-svg ink-blend__overlay"></span><span class="ink-svg ink-blend__base"></span></span>
 					</a>
 				</div>
 				<!-- data-*：search.js 用的地址前缀（当前语言）和几句提示 -->
@@ -98,7 +97,6 @@
 						<div class="site-footer__brand" data-footer-item="0">
 							<a href="{{tiqianHome}}" aria-label="{{t.tiqianHomeLabel}}">
 								<span class="site-footer__logo" aria-hidden="true">
-									<span class="ink-svg" style="--ink-svg-src: url('{{brandLogoText}}')"></span>
 									{{brandLogoMark}}
 								</span>
 							</a>

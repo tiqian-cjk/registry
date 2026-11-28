@@ -725,8 +725,27 @@ const LOGO_MARK_PLACEMENTS = {
 		'zh-Hant': placement(160, 64, 8.31, 10.98, 20.35)
 	}
 };
-const logoMark = ({ width, height, scale, x, y }) =>
-	`<svg class="logo-mark" data-duration="${LOGO_DURATION}" viewBox="0 0 ${width} ${height}" aria-hidden="true"><g transform="translate(${x.toFixed(3)} ${y.toFixed(3)}) scale(${scale.toFixed(4)})">${LOGO_ANIMATION}</g></svg>`;
+// site/assets 里一张 SVG 的图形部分：去掉 <svg> 外壳、注释、<defs>（里面的样式会作用到整页）和写死的填充色，
+// 放进内联 SVG 后由外层的 fill="currentColor" 上色
+const svgArtwork = (file) =>
+	fs
+		.readFileSync(path.join(here, 'assets', file), 'utf8')
+		.replace(/<\?xml[^>]*>/g, '')
+		.replace(/<!--[\s\S]*?-->/g, '')
+		.replace(/<defs>[\s\S]*?<\/defs>/g, '')
+		.replace(/^[\s\S]*?<svg[^>]*>/, '')
+		.replace(/<\/svg>\s*$/, '')
+		.replace(/ (fill|class)="[^"]*"/g, '')
+		.replace(/\s*\n\s*/g, ' ')
+		.trim();
+
+// 一张 SVG 写成 data URI（放在 style 属性里当遮罩用，不另外请求）
+const svgDataUri = (file) =>
+	`data:image/svg+xml,${encodeURIComponent(fs.readFileSync(path.join(here, 'assets', file), 'utf8').replace(/\s*\n\s*/g, ' ').trim()).replace(/'/g, '%27')}`;
+
+// 标志的内联 SVG：字（textFile）和会动的标志叠在同一块画布上，颜色跟着文字色走
+const logoArt = (textFile, { width, height, scale, x, y }) =>
+	`<svg class="logo-mark" data-duration="${LOGO_DURATION}" viewBox="0 0 ${width} ${height}" aria-hidden="true"><g fill="currentColor">${svgArtwork(textFile)}</g><g transform="translate(${x.toFixed(3)} ${y.toFixed(3)}) scale(${scale.toFixed(4)})">${LOGO_ANIMATION}</g></svg>`;
 
 // 分享预览（Open Graph）里的语言写法
 const OG_LOCALES = { 'zh-Hans': 'zh_CN', 'zh-Hant': 'zh_TW', en: 'en_US' };
@@ -750,12 +769,20 @@ function page(main, pagePath, title, head = '', description = t.meta.description
 		tiqianHome: locale === defaultLocale ? 'https://tiqian.org/' : `https://tiqian.org/${locale}`,
 		searchBase: locale === defaultLocale ? '' : `/${locale}`,
 		// 标志按语言换：英文是拼音「Tíqiàn」，繁中是「提槧」（尺寸差异见 style.css 的 .site-header:lang(…) 和 .site-footer:lang(…)）
-		// 页眉、页脚的标志都拆成两层：字（下面这几张 SVG，不含标志）和标志（logoMark 生成的内联 SVG，悬停时点头眨眼，见 site/logo.js）
-		brandText: { en: '/assets/registry-text-en.svg', 'zh-Hant': '/assets/registry-text-hant.svg' }[locale] ?? '/assets/registry-text.svg',
-		brandMark: logoMark(LOGO_MARK_PLACEMENTS.header[locale] ?? LOGO_MARK_PLACEMENTS.header.default),
-		brandWord: locale === 'en' ? '/assets/registry-word-en.svg' : '/assets/registry-word.svg',
-		brandLogoText: { en: '/assets/brand-text-en.svg', 'zh-Hant': '/assets/brand-text-hant.svg' }[locale] ?? '/assets/brand-text.svg',
-		brandLogoMark: logoMark(LOGO_MARK_PLACEMENTS.footer[locale] ?? LOGO_MARK_PLACEMENTS.footer.default),
+		// 页眉、页脚的标志：字（*-text*.svg，不含标志）和会动的标志合成一张内联 SVG（见 logoArt），和页面一起出来，
+		// 不另外加载图片，免得字、标志、Registry 先后分几块出现
+		brandMark: logoArt(
+			{ en: 'registry-text-en.svg', 'zh-Hant': 'registry-text-hant.svg' }[locale] ?? 'registry-text.svg',
+			LOGO_MARK_PLACEMENTS.header[locale] ?? LOGO_MARK_PLACEMENTS.header.default
+		),
+		// 「Registry」和 POWERED BY BORING PLATFORM 要用作遮罩（两层取色，见 style.css 的 .ink-blend），写成 data URI 直接放进页面
+		brandWord: svgDataUri(locale === 'en' ? 'registry-word-en.svg' : 'registry-word.svg'),
+		poweredWide: svgDataUri('powered-by-boring-platform.svg'),
+		poweredNarrow: svgDataUri('boring-platform.svg'),
+		brandLogoMark: logoArt(
+			{ en: 'brand-text-en.svg', 'zh-Hant': 'brand-text-hant.svg' }[locale] ?? 'brand-text.svg',
+			LOGO_MARK_PLACEMENTS.footer[locale] ?? LOGO_MARK_PLACEMENTS.footer.default
+		),
 		// 搜索引擎用：同一页的各语言版本
 		alternates: locales
 			.map((target) => `\t\t<link rel="alternate" hreflang="${target}" href="${BASE}${hrefs[target]}" />`)
