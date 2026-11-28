@@ -10,6 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHtmlPreparer, renderSnapshotServerAssets } from '@tiqian/precompute/precompute-html';
 import { createCssVariablesTheme, createHighlighter } from 'shiki';
+import { OG_HEIGHT, OG_WIDTH, detailImageSvg, homeImageSvg, renderPng } from './og.mjs';
 import { defaultLocale, format, localeNames, localizePath, locales, messages, missingKeys } from './i18n.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -796,7 +797,7 @@ function page(main, pagePath, title, head = '', description = t.meta.description
 			.concat(`\t\t<link rel="alternate" hreflang="x-default" href="${BASE}${hrefs[defaultLocale]}" />`)
 			.join('\n'),
 		description: escape(description),
-		// 规范地址和分享预览（Open Graph、Twitter）。还没有预览图，Twitter 用不带大图的 summary
+		// 规范地址和分享预览（Open Graph、Twitter），预览图见上面的 ogImagePath
 		social: [
 			`<link rel="canonical" href="${BASE}${hrefs[locale]}" />`,
 			`<meta property="og:type" content="website" />`,
@@ -808,7 +809,11 @@ function page(main, pagePath, title, head = '', description = t.meta.description
 			...locales
 				.filter((target) => target !== locale)
 				.map((target) => `<meta property="og:locale:alternate" content="${OG_LOCALES[target]}" />`),
-			`<meta name="twitter:card" content="summary" />`
+			`<meta property="og:image" content="${BASE}${ogImagePath(locale, pagePath)}" />`,
+			`<meta property="og:image:width" content="${OG_WIDTH}" />`,
+			`<meta property="og:image:height" content="${OG_HEIGHT}" />`,
+			`<meta property="og:image:alt" content="${escape(t.siteName)}" />`,
+			`<meta name="twitter:card" content="summary_large_image" />`
 		]
 			.map((line) => `\t\t${line}`)
 			.join('\n'),
@@ -852,6 +857,85 @@ const write = (file, html) => {
 	fs.mkdirSync(path.dirname(file), { recursive: true });
 	fs.writeFileSync(file, html);
 };
+
+// ---------- 分享预览图 ----------
+
+// 每个页面一张，每种语言各一张（标志、小标题不一样）：
+//   首页 /og/home.png（简体）、/og/home.zh-Hant.png、/og/home.en.png
+//   详情页 /og/<组>/<卡片>.png、/og/<组>/<卡片>.zh-Hant.png……
+// pagePath 同 page() 的，不带语言前缀
+const ogImagePath = (target, pagePath = '/') => {
+	const name = pagePath === '/' ? '/og/home' : `/og${pagePath.replace(/\/$/, '')}`;
+	return target === defaultLocale ? `${name}.png` : `${name}.${target}.png`;
+};
+{
+	// 卡片底色从 style.css 里读（.card--<id> 的 --card-bg，亮色那个），和首页一致
+	const css = fs.readFileSync(path.join(here, 'style.css'), 'utf8');
+	const cardColor = (id, variable) =>
+		/#[0-9a-f]{6}/i.exec(new RegExp(`\\.card--${id} \\{[^}]*?--${variable}: light-dark\\(([^,]+),`).exec(css)?.[1] ?? '')?.[0] ?? '#e1e3e6';
+	const cardBg = (id) => cardColor(id, 'card-bg');
+	const cardInfo = (groupId, cardId) => {
+		const group = catalog.groups.find((g) => g.id === groupId);
+		const card = group.cards.find((c) => c.id === cardId);
+		const versions = sectionsOf(card)
+			.flatMap((s) => s.packages)
+			.map((ref) => latest([...lookup(packages, ref, `${groupId}/${cardId}`).versions.keys()]));
+		return { title: card.title, version: latest(versions), bg: cardBg(cardId) };
+	};
+	// 上一行、下一行各三张（最左一张只露出右边一截）。手调改这里
+	const cards = [
+		['engine', 'swift'], ['platform', 'web'], ['platform', 'android'],
+		['engine', 'rust'], ['engine', 'kotlin'], ['engine', 'typescript']
+	].map(([g, c]) => cardInfo(g, c));
+	// 各语言的标志：「Registry」右缘在画布上的 x（英文版画布宽一些，Registry 往右挪了 36.83，见 registry-word-en.svg）
+	const logos = {
+		'zh-Hans': { mark: 'registry-mark.svg', word: 'registry-word.svg', wordRight: 550.11 },
+		'zh-Hant': { mark: 'registry-mark-hant.svg', word: 'registry-word.svg', wordRight: 550.11 },
+		en: { mark: 'registry-mark-en.svg', word: 'registry-word-en.svg', wordRight: 586.94 }
+	};
+	// 字体：site/og-fonts.py 切的静态 TTF（resvg 不认 woff2 和可变字体）
+	const fontFiles = fs
+		.readdirSync(path.join(here, 'og-fonts'))
+		.filter((file) => file.endsWith('.ttf'))
+		.map((file) => path.join(here, 'og-fonts', file));
+	const assets = path.join(here, 'assets');
+	const writePng = (file, svg) => {
+		fs.mkdirSync(path.dirname(path.join(args.out, file)), { recursive: true });
+		fs.writeFileSync(path.join(args.out, file), renderPng(svg, fontFiles));
+	};
+	for (const target of locales) {
+		const tt = messages[target];
+		writePng(ogImagePath(target), homeImageSvg({ cards, assets, fontFamily: 'JetBrains Mono', logo: logos[target] }));
+		// 详情页右下的小标题：中文用 MiSans Medium 13px，英文同页面上那样全大写、12px、字距 0.04em（都再乘大卡片的放大倍数）
+		const labelStyle =
+			target === 'en'
+				? { family: 'Inter', weight: 500, size: 12 * 2.2, tracking: 12 * 2.2 * 0.04, upper: true }
+				: { family: 'MiSans VF', weight: 500, size: 13 * 2.2 };
+		const label = (text) => (labelStyle.upper ? text.toUpperCase() : text);
+		for (const group of catalog.groups) {
+			for (const card of group.cards) {
+				const all = sectionsOf(card).flatMap((s) => s.packages).map((ref) => lookup(packages, ref, `${group.id}/${card.id}`));
+				const metas = all.map((p) => p.versions.get(latest([...p.versions.keys()])));
+				const licenses = [...new Set(metas.map((m) => m.license).filter(Boolean))];
+				const facts = [
+					{ label: label(tt.detail.version), value: latest(metas.map((m) => m.version)), kind: 'version' },
+					{ label: label(tt.detail.source), value: 'GitHub', kind: 'link' },
+					...(licenses.length ? [{ label: label(tt.detail.license), value: licenses.join(' / '), kind: 'text' }] : [])
+				];
+				const svg = detailImageSvg({
+					card: { group: group.title, title: card.title, bg: cardBg(card.id), blobs: [1, 2, 3].map((n) => cardColor(card.id, `card-blob-${n}`)) },
+					facts,
+					labelStyle,
+					assets,
+					logo: logos[target],
+					fontFiles,
+					arrowPath: ICONS.arrowOutward
+				});
+				writePng(ogImagePath(target, `/${group.id}/${card.id}/`), svg);
+			}
+		}
+	}
+}
 
 // 每种语言输出一套：简体中文在根目录，其余在 <语言>/ 下
 let details = 0;
