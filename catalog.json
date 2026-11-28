@@ -6,26 +6,31 @@
       "cards": [
         {
           "id": "typescript",
+          "source": "engine-haxe",
           "title": "TypeScript",
           "packages": ["npm:@tiqian/engine", "npm:@tiqian/protocol", "npm:@tiqian/shared"]
         },
         {
           "id": "kotlin",
+          "source": "engine-haxe",
           "title": "Kotlin",
           "packages": ["maven:org.tiqian:tiqian-engine", "maven:org.tiqian:tiqian-engine-f64", "maven:org.tiqian:tiqian-protocol"]
         },
         {
           "id": "rust",
+          "source": "engine-haxe",
           "title": "Rust",
           "packages": ["cargo:tiqian-engine", "cargo:tiqian-protocol"]
         },
         {
           "id": "swift",
+          "source": "engine-haxe",
           "title": "Swift",
           "packages": ["swift:tiqian-engine-f32", "swift:tiqian-engine-f64", "swift:tiqian-protocol"]
         },
         {
           "id": "dart",
+          "source": "engine-haxe",
           "title": "Dart",
           "packages": ["pub:tiqian_engine", "pub:tiqian_protocol"]
         }
@@ -37,6 +42,7 @@
       "cards": [
         {
           "id": "web",
+          "source": "platforms/web",
           "title": "Web",
           "sections": [
             { "title": "集成", "packages": ["npm:@tiqian/web-component", "npm:@tiqian/react", "npm:@tiqian/astro", "npm:@tiqian/sveltekit"] },
@@ -46,6 +52,7 @@
         },
         {
           "id": "compose",
+          "source": "platforms/compose",
           "title": "Compose",
           "sections": [
             { "title": "组件", "packages": ["maven:org.tiqian:tiqian-compose", "maven:org.tiqian:tiqian-compose-material3"] },
@@ -54,6 +61,7 @@
         },
         {
           "id": "android",
+          "source": "platforms/android",
           "title": "Android",
           "sections": [
             { "title": "组件", "packages": ["maven:org.tiqian:tiqian-android-view"] },
@@ -86,6 +94,7 @@
       "cards": [
         {
           "id": "compose",
+          "source": "platforms/compose/compose",
           "title": "Compose",
           "packages": ["maven:org.tiqian:math-compose"]
         }

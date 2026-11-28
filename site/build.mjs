@@ -573,8 +573,15 @@ async function renderDetail(group, card, packages) {
 	out.push(`${indent(6)}<div><dt>${escape(t.detail.version)}</dt><dd class="detail__facts-version">${blend(escape(version))}</dd></div>`);
 	for (const repository of repositories) {
 		const label = repositories.length > 1 ? repository : 'GitHub';
+		// catalog.json 里写了 source（仓库里的子目录）就链到那里，按最新版本的发布标签（目录以后挪了链接也不失效）；
+		// 没写就链到仓库首页
+		const tag = metas.find((m) => m.repository === repository && m.tag)?.tag;
+		const href =
+			card.source && tag
+				? `https://github.com/${repository}/tree/${encodeURIComponent(tag)}/${card.source}`
+				: `https://github.com/${repository}`;
 		out.push(
-			`${indent(6)}<div><dt>${escape(t.detail.source)}</dt><dd><a href="https://github.com/${escape(repository)}" aria-label="${escape(label)}">${blend(`${escape(label)}${icon('arrowOutward', 'detail__facts-icon')}`)}</a></dd></div>`
+			`${indent(6)}<div><dt>${escape(t.detail.source)}</dt><dd><a href="${escape(href)}" aria-label="${escape(label)}">${blend(`${escape(label)}${icon('arrowOutward', 'detail__facts-icon')}`)}</a></dd></div>`
 		);
 	}
 	if (licenses.length) out.push(`${indent(6)}<div><dt>${escape(t.detail.license)}</dt><dd>${blend(escape(licenses.join(' / ')))}</dd></div>`);
